@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Bill Explorer</title>
+    <title>Universal Bill Explorer</title>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
 
     <style>
@@ -19,283 +20,94 @@
             --border-radius: 8px;
             --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
+        body { font-family: var(--font-family); margin: 0; background-color: var(--background-color); color: var(--text-color); line-height: 1.6; }
+        .container { display: flex; min-height: 100vh; }
 
-        body {
-            font-family: var(--font-family);
-            margin: 0;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-
-        .container {
+        /* --- Upload Screen --- */
+        #upload-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
-            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            transition: opacity 0.3s;
         }
+        .upload-box {
+            background: var(--white);
+            padding: 3rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        #pdf-upload { display: none; }
+        .upload-label {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .upload-label:hover { background-color: #00487c; }
+        #processing-message { margin-top: 1rem; color: #555; font-style: italic; }
 
         /* --- Sidebar / Table of Contents --- */
-        .sidebar {
-            width: 320px;
-            background-color: var(--white);
-            border-right: 1px solid var(--light-gray);
-            padding: 2rem 1rem;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-
-        .sidebar-header {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--secondary-color);
-        }
-
-        .toc-list, .toc-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .toc-list > li > button {
-            font-weight: 600;
-            font-size: 1rem;
-        }
+        .sidebar { width: 320px; background-color: var(--white); border-right: 1px solid var(--light-gray); padding: 2rem 1rem; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 1000; }
+        .sidebar-header { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid var(--secondary-color); }
+        .toc-list, .toc-list ul { list-style: none; padding: 0; margin: 0; }
+        .toc-list button { display: block; width: 100%; text-align: left; padding: 0.75rem 1rem; background: none; border: none; color: var(--text-color); cursor: pointer; border-radius: var(--border-radius); font-size: 0.9rem; }
+        .toc-list button:hover { background-color: var(--light-gray); }
+        .toc-list .toc-title > button { font-weight: bold; position: relative; }
+        .toc-list .toc-title > button::after { content: '›'; position: absolute; right: 1rem; font-size: 1.5rem; transition: transform 0.2s; }
+        .toc-list .toc-title.open > button::after { transform: rotate(90deg); }
+        .toc-list ul { padding-left: 1rem; display: none; }
+        .toc-list .toc-title.open > ul { display: block; }
         
-        .toc-list button {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 0.75rem 1rem;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            cursor: pointer;
-            border-radius: var(--border-radius);
-            font-size: 0.9rem;
-        }
-
-        .toc-list button:hover {
-            background-color: var(--light-gray);
-        }
-        
-        .toc-list .toc-title > button {
-            font-weight: bold;
-            position: relative;
-        }
-        
-        .toc-list .toc-title > button::after {
-            content: '›';
-            position: absolute;
-            right: 1rem;
-            font-size: 1.5rem;
-            transition: transform 0.2s;
-        }
-
-        .toc-list .toc-title.open > button::after {
-            transform: rotate(90deg);
-        }
-        
-        .toc-list ul {
-            padding-left: 1rem;
-            display: none;
-        }
-        
-        .toc-list .toc-title.open > ul {
-            display: block;
-        }
-
-
         /* --- Main Content --- */
-        .main-content {
-            margin-left: 320px;
-            padding: 2rem;
-            width: calc(100% - 320px);
-        }
+        .main-content { margin-left: 320px; padding: 2rem; width: calc(100% - 320px); }
+        .controls { background: var(--white); padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--box-shadow); margin-bottom: 2rem; position: sticky; top: 1rem; z-index: 999; }
+        .search-box input { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; border-radius: var(--border-radius); border: 1px solid var(--light-gray); }
+        
+        .bill-section { background: var(--white); border-radius: var(--border-radius); margin-bottom: 1.5rem; box-shadow: var(--box-shadow); overflow: hidden; }
+        .bill-section.hidden { display: none; }
+        .section-header { padding: 1rem 1.5rem; background-color: #fdfdff; border-bottom: 1px solid var(--light-gray); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .section-header h2 { margin: 0; font-size: 1.2rem; color: var(--primary-color); }
+        .section-id { font-family: monospace; font-size: 0.9rem; color: #6c757d; }
+        .section-body { padding: 1.5rem; white-space: pre-wrap; font-family: "Georgia", serif; font-size: 1.1rem; max-height: 500px; overflow: hidden; transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out; }
+        .bill-section.collapsed .section-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+        .section-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--light-gray); background-color: #fdfdff; }
+        .ask-chatgpt-btn { background-color: #10a37f; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: var(--border-radius); cursor: pointer; font-weight: 600; transition: background-color 0.2s; }
+        .ask-chatgpt-btn:hover { background-color: #0d8c6c; }
+        
+        .tooltip { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 0.75rem 1.5rem; border-radius: var(--border-radius); z-index: 2000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .tooltip.visible { opacity: 1; }
 
-        .controls {
-            background: var(--white);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            margin-bottom: 2rem;
-            position: sticky;
-            top: 1rem;
-            z-index: 999;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--light-gray);
-        }
-        
-        .filters {
-            margin-top: 1rem;
-        }
-        
-        .filter-tag {
-            display: inline-block;
-            background: var(--light-gray);
-            color: var(--text-color);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            margin: 0.25rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            font-size: 0.85rem;
-        }
-        
-        .filter-tag:hover, .filter-tag.active {
-            background-color: var(--primary-color);
-            color: var(--white);
-        }
-
-        .bill-section {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            margin-bottom: 1.5rem;
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        
-        .bill-section.hidden {
-            display: none;
-        }
-
-        .section-header {
-            padding: 1rem 1.5rem;
-            background-color: #fdfdff;
-            border-bottom: 1px solid var(--light-gray);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .section-header h2 {
-            margin: 0;
-            font-size: 1.2rem;
-            color: var(--primary-color);
-        }
-        
-        .section-id {
-            font-family: monospace;
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-
-        .section-body {
-            padding: 1.5rem;
-            white-space: pre-wrap;
-            font-family: "Georgia", serif;
-            font-size: 1.1rem;
-            max-height: 500px;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
-        }
-        
-        .bill-section.collapsed .section-body {
-            max-height: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-
-        .section-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--light-gray);
-            background-color: #fdfdff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .committee-tag {
-            font-size: 0.8rem;
-            font-weight: 500;
-            background-color: var(--light-gray);
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-        }
-
-        .ask-chatgpt-btn {
-            background-color: #10a37f;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-        
-        .ask-chatgpt-btn:hover {
-            background-color: #0d8c6c;
-        }
-        
-        .tooltip {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--border-radius);
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-
-        .tooltip.visible {
-            opacity: 1;
-        }
-
-        /* --- Mobile Responsiveness --- */
+        /* --- Mobile --- */
         @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-                max-height: 50vh;
-                border-right: none;
-                border-bottom: 1px solid var(--light-gray);
-                box-sizing: border-box;
-            }
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-                padding: 1rem;
-                box-sizing: border-box;
-            }
-            .controls {
-                position: static;
-            }
-            .section-header h2 {
-                font-size: 1.1rem;
-            }
-            .section-body {
-                font-size: 1rem;
-            }
+            .container { flex-direction: column; }
+            .sidebar { position: relative; width: 100%; height: auto; max-height: 50vh; border-right: none; border-bottom: 1px solid var(--light-gray); box-sizing: border-box; }
+            .main-content { margin-left: 0; width: 100%; padding: 1rem; box-sizing: border-box; }
+            .controls { position: static; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div id="upload-container">
+        <div class="upload-box">
+            <h2>Universal Bill Explorer</h2>
+            <p>Select a PDF of a bill to begin.</p>
+            <label for="pdf-upload" class="upload-label">Upload PDF</label>
+            <input type="file" id="pdf-upload" accept="application/pdf">
+            <p id="processing-message"></p>
+        </div>
+    </div>
+
+    <div class="container" style="display: none;">
         <nav class="sidebar" id="toc-sidebar">
             <div class="sidebar-header">Table of Contents</div>
             <ul class="toc-list" id="toc-list"></ul>
@@ -306,13 +118,9 @@
                 <div class="search-box">
                     <input type="search" id="search-input" placeholder="🔍 Search the entire bill...">
                 </div>
-                <div class="filters" id="filters-container">
-                    <span class="filter-tag active" data-committee="all">All Committees</span>
-                </div>
             </div>
             
-            <div id="bill-content-container">
-                </div>
+            <div id="bill-content-container"></div>
         </main>
     </div>
 
@@ -320,145 +128,162 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // pdf.js worker setup
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
 
-        // --- DATA ---
-        // This data structure is created by parsing the provided PDF text.
-        const billData = [
-            // Note: For brevity, only a few representative sections are included here.
-            // A full implementation would contain all sections from the PDF.
-            {
-                "id": "10101",
-                "titleName": "RE-EVALUATION OF THRIFTY FOOD PLAN.",
-                "committee": "Agriculture, Nutrition, and Forestry",
-                "fullText": `SEC. 10101. RE-EVALUATION OF THRIFTY FOOD PLAN.\n(a) IN GENERAL. Section 3 of the Food and Nutri- tion Act of 2008 (7 U.S.C. 2012) is amended by striking subsection (u) and inserting the following:\n"(u) THRIFTY FOOD PLAN.-\n"(1) IN GENERAL. The term 'thrifty food plan' means the diet required to feed a family of 4 persons consisting of a man and a woman ages 20 through 50, a child ages 6 through 8, and a child ages 9 through 11 using the items and quantities of food described in the report of the Department of Agriculture entitled 'Thrifty Food Plan, 2021', and each successor report updated pursuant to this subsection, subject to the conditions that-\n"(A) the relevant market baskets of the thrifty food plan shall only be changed pursuant to paragraph (4);\n"(B) the cost of the thrifty food plan shall be the basis for uniform allotments for all house- holds, regardless of the actual composition of the household; and\n"(C) the cost of the thrifty food plan may only be adjusted in accordance with this sub- section.\n... [and so on for the full section text]"`
-            },
-            {
-                "id": "10102",
-                "titleName": "MODIFICATIONS TO SNAP WORK REQUIREMENTS FOR ABLE-BODIED ADULTS.",
-                "committee": "Agriculture, Nutrition, and Forestry",
-                "fullText": `SEC. 10102. MODIFICATIONS TO SNAP WORK REQUIRE- MENTS FOR ABLE-BODIED ADULTS.\n(a) EXCEPTIONS. - Section 6(0) of the Food and Nutri- tion Act of 2008 (7 U.S.C. 2015(0)) is amended by striking paragraph (3) and inserting the following:\n"(3) EXCEPTIONS. - Paragraph (2) shall not apply to an individual if the individual is-\n"(A) under 18, or over 65, years of age;\n"(B) medically certified as physically or mentally unfit for employment;\n"(C) a parent or other member of a house- hold with responsibility for a dependent child under 14 years of age; ... [full text]"`
-            },
-            {
-                "id": "20001",
-                "titleName": "ENHANCEMENT OF DEPARTMENT OF DEFENSE RESOURCES FOR IMPROVING THE QUALITY OF LIFE FOR MILITARY PERSONNEL.",
-                "committee": "Armed Services",
-                "fullText": `SEC. 20001. ENHANCEMENT OF DEPARTMENT OF DEFENSE RESOURCES FOR IMPROVING THE QUALITY OF LIFE FOR MILITARY PERSONNEL.\n(a) APPROPRIATIONS. In addition to amounts other- wise available, there are appropriated to the Secretary of Defense for fiscal year 2025, out of any money in the Treas- ury not otherwise appropriated, to remain available until September 30, 2029-\n(1) \$230,480,000 for restoration and moderniza- tion costs under the Marine Corps Barracks 2030 ini- tiative;\n(2) \$119,000,000 for base operating support costs under the Marine Corps; ... [full text]"`
-            },
-            {
-                "id": "70101",
-                "titleName": "Extension and enhancement of reduced rates.",
-                "committee": "Finance",
-                "fullText": `SEC. 70101. EXTENSION AND ENHANCEMENT OF REDUCED RATES.\n(a) IN GENERAL.—Section 1(j)(2) of the Internal Revenue Code of 1986 is amended by striking subparagraph (F).\n(b) EFFECTIVE DATE.—The amendment made by this section shall apply to taxable years beginning after December 31, 2025.`
-            },
-            {
-                "id": "90001",
-                "titleName": "BORDER INFRASTRUCTURE AND WALL SYSTEM.",
-                "committee": "Homeland Security and Governmental Affairs",
-                "fullText": `SEC. 90001. BORDER INFRASTRUCTURE AND WALL SYSTEM.\nIn addition to amounts otherwise available, there is appropriated to the Commissioner of U.S. Customs and Border Protection for fiscal year 2025, out of any money in the Treasury not otherwise appropriated, to remain available until September 30, 2029, \$46,550,000,000 for necessary expenses relating to the following elements of the border infrastructure and wall system: ... [full text]`
-            }
-        ];
+        let billData = [];
+        let tocData = {};
+        let fuse;
+
+        const uploadInput = document.getElementById('pdf-upload');
+        const uploadContainer = document.getElementById('upload-container');
+        const processingMessage = document.getElementById('processing-message');
+        const mainContainer = document.querySelector('.container');
         
-        const tocData = {
-            "TITLE I: Agriculture, Nutrition, and Forestry": [
-                {id: '10101', title: 'Re-evaluation of thrifty food plan.'},
-                {id: '10102', title: 'Modifications to SNAP work requirements.'},
-            ],
-            "TITLE II: Armed Services": [
-                {id: '20001', title: 'Enhancement of DoD resources for quality of life.'},
-            ],
-            "TITLE VII: Finance": [
-                {id: '70101', title: 'Extension and enhancement of reduced rates.'},
-            ],
-            "TITLE IX: Homeland Security and Governmental Affairs": [
-                {id: '90001', title: 'Border infrastructure and wall system.'},
-            ]
-        };
-
-        const committees = [...new Set(billData.map(section => section.committee))];
-
-        // --- FUSE.JS SEARCH SETUP ---
-        const fuse = new Fuse(billData, {
-            keys: ['id', 'titleName', 'fullText'],
-            includeScore: true,
-            threshold: 0.4,
-            minMatchCharLength: 3,
-        });
-
-        // --- DOM ELEMENTS ---
         const tocList = document.getElementById('toc-list');
         const contentContainer = document.getElementById('bill-content-container');
         const searchInput = document.getElementById('search-input');
-        const filtersContainer = document.getElementById('filters-container');
         const tooltip = document.getElementById('tooltip');
 
-        // --- RENDER FUNCTIONS ---
-        function renderTOC() {
-            let html = '';
-            for (const title in tocData) {
-                html += `<li class="toc-title"><button>${title}</button><ul>`;
-                tocData[title].forEach(item => {
-                    html += `<li><button data-scroll-to="section-${item.id}">${item.id}: ${item.title}</button></li>`;
-                });
-                html += `</ul></li>`;
+        uploadInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                processingMessage.textContent = 'Processing... this may take a moment.';
+                parsePDF(file);
             }
-            tocList.innerHTML = html;
+        });
+
+        async function parsePDF(file) {
+            const fileReader = new FileReader();
+            fileReader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument({data: typedarray}).promise;
+                
+                let fullText = '';
+                let textItems = [];
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    textItems = textItems.concat(content.items);
+                    fullText += content.items.map(item => item.str).join(' ');
+                }
+
+                // --- Heuristic Parsing Logic ---
+                const parsed = structureText(textItems);
+                billData = parsed.billData;
+                tocData = parsed.tocData;
+
+                // --- Initialize Search ---
+                fuse = new Fuse(billData, {
+                    keys: ['id', 'titleName', 'fullText'],
+                    includeScore: true, threshold: 0.4, minMatchCharLength: 3
+                });
+
+                // --- Render UI ---
+                initUI();
+            };
+            fileReader.readAsArrayBuffer(file);
+        }
+        
+        function structureText(items) {
+            const localBillData = [];
+            const localTocData = {};
+            let currentSection = null;
+            let currentTitle = "Untitled";
+
+            // A simple heuristic: identify titles by looking for all-caps lines
+            // and sections by "SEC. XXX." pattern.
+            const sectionRegex = /^SEC\. (\d+)\. /;
+
+            let fullText = items.map(item => item.str).join("\n");
+            let sections = fullText.split(/\n(?=SEC\. \d+\. )/);
+            
+            sections.forEach((sectionText, index) => {
+                const match = sectionText.match(sectionRegex);
+                if (match) {
+                    const id = match[1];
+                    // Title is the first line after the SEC. XXX. part
+                    const lines = sectionText.replace(sectionRegex, '').split('\n');
+                    const titleName = lines[0].trim();
+                    const fullText = sectionText.trim();
+
+                    // Rudimentary title detection
+                    const titleMatch = sectionText.match(/TITLE [IVXLC]+\—([^\n]+)/);
+                    if (titleMatch && titleMatch[1]) {
+                        currentTitle = `TITLE ${titleMatch[0].split('—')[0].replace('TITLE ','')}—${titleMatch[1].trim()}`;
+                        if (!localTocData[currentTitle]) {
+                            localTocData[currentTitle] = [];
+                        }
+                    }
+
+                    const sectionData = { id, titleName, fullText };
+                    localBillData.push(sectionData);
+
+                    if (!localTocData[currentTitle]) {
+                        localTocData[currentTitle] = [];
+                    }
+                    localTocData[currentTitle].push({ id, title: titleName });
+                }
+            });
+            
+            if (localBillData.length === 0) { // Fallback for less structured docs
+                localBillData.push({id: '1', titleName: 'Full Document Text', fullText: items.map(i=>i.str).join(' ')});
+                localTocData['Full Document'] = [{id: '1', title: 'Full Document Text'}];
+            }
+
+            return { billData: localBillData, tocData: localTocData };
         }
 
-        function renderFilters() {
-            committees.forEach(committee => {
-                const tag = document.createElement('span');
-                tag.className = 'filter-tag';
-                tag.dataset.committee = committee;
-                tag.textContent = committee;
-                filtersContainer.appendChild(tag);
-            });
+        function initUI() {
+            // Hide upload, show main content
+            uploadContainer.style.opacity = '0';
+            setTimeout(() => uploadContainer.style.display = 'none', 300);
+            mainContainer.style.display = 'flex';
+
+            renderTOC();
+            renderContent(billData);
+            
+            document.querySelectorAll('.bill-section').forEach(section => section.classList.add('collapsed'));
+
+            // Attach event listeners
+            tocList.addEventListener('click', handleTOCClick);
+            searchInput.addEventListener('input', handleSearch);
+            contentContainer.addEventListener('click', handleSectionEvents);
+        }
+
+        function renderTOC() {
+            tocList.innerHTML = Object.entries(tocData).map(([title, items]) => `
+                <li class="toc-title">
+                    <button>${title}</button>
+                    <ul>
+                        ${items.map(item => `<li><button data-scroll-to="section-${item.id}">${item.id}: ${item.title}</button></li>`).join('')}
+                    </ul>
+                </li>
+            `).join('');
         }
         
         function renderContent(data) {
             contentContainer.innerHTML = data.map(section => `
-                <div class="bill-section" id="section-${section.id}" data-committee="${section.committee}">
+                <div class="bill-section" id="section-${section.id}">
                     <div class="section-header">
                         <h2><span class="section-id">SEC. ${section.id}</span> ${section.titleName}</h2>
                     </div>
-                    <div class="section-body">
-                        ${section.fullText}
-                    </div>
+                    <div class="section-body">${section.fullText}</div>
                     <div class="section-footer">
-                         <span class="committee-tag">${section.committee}</span>
                          <button class="ask-chatgpt-btn" data-section-id="${section.id}">Ask ChatGPT</button>
                     </div>
                 </div>
             `).join('');
         }
-
-        // --- EVENT HANDLERS ---
+        
         function handleTOCClick(e) {
             if (e.target.matches('[data-scroll-to]')) {
                 const targetId = e.target.dataset.scrollTo;
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+                document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else if (e.target.parentElement.classList.contains('toc-title')) {
                 e.target.parentElement.classList.toggle('open');
             }
-        }
-        
-        function handleFilterClick(e) {
-            if (!e.target.matches('.filter-tag')) return;
-            
-            const selectedCommittee = e.target.dataset.committee;
-            
-            // Update active state on tags
-            document.querySelectorAll('.filter-tag').forEach(tag => {
-                tag.classList.toggle('active', tag.dataset.committee === selectedCommittee);
-            });
-            
-            // Filter content
-            document.querySelectorAll('.bill-section').forEach(section => {
-                const isVisible = selectedCommittee === 'all' || section.dataset.committee === selectedCommittee;
-                section.classList.toggle('hidden', !isVisible);
-            });
         }
 
         function handleSearch(e) {
@@ -467,68 +292,40 @@
                 document.querySelectorAll('.bill-section').forEach(el => el.classList.remove('hidden'));
                 return;
             }
-
             const results = fuse.search(query);
             const resultIds = new Set(results.map(res => `section-${res.item.id}`));
-
             document.querySelectorAll('.bill-section').forEach(section => {
                 section.classList.toggle('hidden', !resultIds.has(section.id));
             });
         }
-
-        function handleAskChatGPT(e) {
-            if (!e.target.matches('.ask-chatgpt-btn')) return;
-
-            const sectionId = e.target.dataset.sectionId;
-            const section = billData.find(s => s.id === sectionId);
-            if (!section) return;
-
-            const promptText = `What does this section of the bill mean, and how could it affect me?\n\n${section.fullText}`;
-
-            navigator.clipboard.writeText(promptText).then(() => {
-                showTooltip("Section text copied – paste it into ChatGPT and ask what it means.");
-                window.open('https://chat.openai.com/', '_blank');
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-                showTooltip("Failed to copy text. Please copy manually.");
-            });
-        }
         
-        function handleSectionCollapse(e) {
+        function handleSectionEvents(e) {
+            // Collapse/Expand
             const header = e.target.closest('.section-header');
             if (header) {
                 header.parentElement.classList.toggle('collapsed');
+            }
+            
+            // Ask ChatGPT button
+            const chatGptBtn = e.target.closest('.ask-chatgpt-btn');
+            if (chatGptBtn) {
+                const sectionId = chatGptBtn.dataset.sectionId;
+                const section = billData.find(s => s.id === sectionId);
+                if (!section) return;
+
+                const promptText = `What does this section of the bill mean, and how could it affect me?\n\n${section.fullText}`;
+                navigator.clipboard.writeText(promptText).then(() => {
+                    showTooltip("Section text copied – paste it into ChatGPT!");
+                    window.open('https://chat.openai.com/', '_blank');
+                });
             }
         }
         
         function showTooltip(message) {
             tooltip.textContent = message;
             tooltip.classList.add('visible');
-            setTimeout(() => {
-                tooltip.classList.remove('visible');
-            }, 3000);
+            setTimeout(() => tooltip.classList.remove('visible'), 3000);
         }
-
-        // --- INITIALIZATION ---
-        function init() {
-            renderTOC();
-            renderFilters();
-            renderContent(billData);
-            
-            // Add initial collapsed state to all sections
-            document.querySelectorAll('.bill-section').forEach(section => {
-                section.classList.add('collapsed');
-            });
-
-            // Attach event listeners
-            tocList.addEventListener('click', handleTOCClick);
-            filtersContainer.addEventListener('click', handleFilterClick);
-            searchInput.addEventListener('input', handleSearch);
-            contentContainer.addEventListener('click', handleAskChatGPT);
-            contentContainer.addEventListener('click', handleSectionCollapse);
-        }
-
-        init();
     });
     </script>
 </body>
