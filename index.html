@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Interactive Bill Viewer</title>
+<title>Interactive Bill / PDF Viewer</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 :root{--accent:#0057e7;--bg:#fff;--text:#222;--tag:#e0e7ff;--sidebar:270px;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--text);}
+body{font:15px/1.5 system-ui,sans-serif;color:var(--text);background:var(--bg);}
 header{display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;background:var(--accent);color:#fff;}
 header h1{font-size:1rem;flex:1;}
 header input[type=search]{flex:2;max-width:320px;border:0;border-radius:4px;padding:.42rem .6rem;}
-#menuBtn{background:none;border:0;font-size:1.55rem;color:#fff;cursor:pointer;}
-#uploadLbl{font-size:1.3rem;cursor:pointer;}
+#menuBtn{background:none;border:0;font-size:1.6rem;color:#fff;cursor:pointer;}
+#uploadLbl{font-size:1.35rem;cursor:pointer;}
 #fileInput{display:none;}
 aside{position:fixed;inset-block:0;inset-inline-start:0;width:var(--sidebar);background:#f7f8fb;
       overflow:auto;transform:translateX(-100%);transition:transform .3s;}
@@ -31,6 +31,7 @@ details[open] summary::after{content:"▲";float:inline-end;font-size:.7rem;}
 details summary::after{content:"▼";float:inline-end;font-size:.7rem;}
 summary{list-style:none;}
 .loading{text-align:center;padding:3rem;font-style:italic;}
+.error{color:#c00;padding:1rem;text-align:center;}
 #filterBox{display:flex;flex-direction:column;padding:0 .9rem 1rem;}
 #filterBox label{font-size:.82rem;margin-block:.15rem;}
 @media(min-width:768px){aside{transform:none;} main{margin-inline-start:var(--sidebar);}}
@@ -39,103 +40,138 @@ summary{list-style:none;}
 <body>
 <header>
   <button id="menuBtn" aria-label="Toggle Table of Contents">☰</button>
-  <h1 id="docTitle">Bill Viewer</h1>
+  <h1 id="docTitle">PDF Viewer</h1>
   <input id="search" type="search" placeholder="Search full text…">
   <label id="uploadLbl" title="Open PDF" for="fileInput">📂</label>
   <input id="fileInput" type="file" accept="application/pdf">
 </header>
 
-<aside id="sidebar"><h2>Table of Contents</h2><nav id="toc"></nav>
+<aside id="sidebar">
+  <h2>Table&nbsp;of&nbsp;Contents</h2>
+  <nav id="toc"><ul></ul></nav>
   <fieldset id="filterBox"><legend>Filter by committee</legend><div id="filters"></div></fieldset>
 </aside>
 
-<main id="content"><p class="loading">Load a PDF with the 📂 button …</p></main>
+<main id="content"><p class="loading">Tap 📂 to load a PDF…</p></main>
 
-<!-- libs -->
-<script src="https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.min.js"></script>
-<script src="https://unpkg.com/fuse.js@6.6.2"></script>
+<!-- CDN libraries -->
 <script>
+const pdfjsVersion='5.3.31';
+</script>
+<script src="https://unpkg.com/pdfjs-dist@5.3.31/build/pdf.min.js"></script>
+<script src="https://unpkg.com/fuse.js@7.1.0"></script>
+<script>
+/* ========== configuration & worker ========= */
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.min.js';
+  `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/build/pdf.worker.min.js`;
 
-/* ——— DOM refs ——— */
-const sidebar = document.getElementById('sidebar');
-const menuBtn = document.getElementById('menuBtn');
-const tocEl   = document.getElementById('toc');
-const content = document.getElementById('content');
-const searchIn= document.getElementById('search');
-const filters = document.getElementById('filters');
-const fileIn  = document.getElementById('fileInput');
-const titleEl = document.getElementById('docTitle');
-menuBtn.onclick = ()=>sidebar.toggleAttribute('open');
+/* ========== DOM refs ========= */
+const sidebar  = document.getElementById('sidebar');
+const menuBtn  = document.getElementById('menuBtn');
+const tocUl    = document.querySelector('#toc ul');
+const content  = document.getElementById('content');
+const searchIn = document.getElementById('search');
+const filtersDiv = document.getElementById('filters');
+const fileIn   = document.getElementById('fileInput');
+const titleEl  = document.getElementById('docTitle');
+menuBtn.onclick = () => sidebar.toggleAttribute('open');
 
-/* ——— reactive globals ——— */
-let fuse, sections=[];
+/* ========== state ========= */
+let sections=[], fuse;
 
-/* ——— file upload ——— */
-fileIn.onchange = async e=>{
-  const file=e.target.files[0]; if(!file) return;
+/* ========== file upload handler ========= */
+fileIn.addEventListener('change', async e=>{
+  const file=e.target.files[0];
+  if(!file) return;
   titleEl.textContent=file.name;
   const buf=await file.arrayBuffer();
-  await loadPDF({data:buf});
-};
+  loadPDF({data:buf});
+});
 
-/* ——— optional default document ——— */
-loadPDF('BILLS-119hr1eas.pdf').catch(()=>{});   // comment-out if you prefer a blank start
-
-/* ——— main loader ——— */
+/* ===== main loader (re-entrant) ===== */
 async function loadPDF(src){
   /* reset UI */
   sections.length=0;
-  tocEl.innerHTML=''; filters.innerHTML='';
-  content.innerHTML='<p class="loading">Loading …</p>';
+  tocUl.innerHTML='';
+  filtersDiv.innerHTML='';
+  searchIn.value='';
+  content.innerHTML='<p class="loading">Parsing PDF… please wait</p>';
 
-  const pdf = await pdfjsLib.getDocument(src).promise;
-  const outline = await pdf.getOutline();
-  const flat = await flatten(outline,pdf);
-  for(let i=0;i<flat.length;i++){
-    const {item,page}=flat[i];
-    const end = (i+1<flat.length)?flat[i+1].page-1:pdf.numPages-1;
-    const text = await pagesText(pdf,page,end);
-    const committee = committeeFrom(item.title);
-    const id='p'+page;
-    sections.push({id,title:item.title,text,committee});
-    renderSection(id,item.title,text,committee);
-    addTOC(item.title,id);
+  try{
+    const pdf=await pdfjsLib.getDocument(src).promise;
+    const outline=await pdf.getOutline();
+    const flat = outline ? await flatten(outline,pdf) : await fallbackOutline(pdf);
+    for(let i=0;i<flat.length;i++){
+      const {title,start,end}=flat[i];
+      const text=await pagesText(pdf,start,end);
+      const committee=committeeFrom(title);
+      const id='s'+start;
+      sections.push({id,title,text,committee});
+      addTOC(title,id);
+      renderSection(id,title,text,committee);
+    }
+    buildFilters();
+    buildSearch();
+    content.querySelector('.loading')?.remove();
+  }catch(err){
+    console.error(err);
+    content.innerHTML=`<p class="error">❌ Unable to open PDF: ${err.message}</p>`;
   }
-  buildFilters(); buildSearch();
-  content.querySelector('.loading')?.remove();
 }
 
-/* ——— helpers ——— */
-async function flatten(items,pdf,a=[],d=0){
-  for(const it of(items||[])){
+/* ===== helpers ===== */
+async function flatten(items,pdf,out=[],lvl=0){
+  for(const it of items||[]){
     const dest=await pdf.getDestination(it.dest);
-    const pg = await pdf.getPageIndex(dest[0]); // 0-based
-    a.push({item:it,page:pg});
-    if(it.items?.length) await flatten(it.items,pdf,a,d+1);
+    const idx = await pdf.getPageIndex(dest[0]); // 0-based
+    out.push({title:it.title.trim(),start:idx});
+    if(it.items?.length) await flatten(it.items,pdf,out,lvl+1);
   }
-  return a.sort((x,y)=>x.page-y.page);
+  out.sort((a,b)=>a.start-b.start);
+  /* determine end page for each entry */
+  for(let i=0;i<out.length;i++) out[i].end = (i+1<out.length)?out[i+1].start-1:(await pdf.numPages)-1;
+  return out;
 }
-async function pagesText(pdf,s,e){
+async function fallbackOutline(pdf){
+  /* one section per page if no outline */
+  const pages=await pdf.numPages;
+  return Array.from({length:pages},(_,i)=>({
+    title:`Page ${i+1}`,start:i,end:i
+  }));
+}
+async function pagesText(pdf,start,end){
   let out='';
-  for(let p=s;p<=e;p++){
-    const tc=await (await pdf.getPage(p+1)).getTextContent();
-    out+=tc.items.map(i=>i.str).join(' ')+'\n';
-  } return out.trim();
+  for(let p=start;p<=end;p++){
+    const tc = await (await pdf.getPage(p+1)).getTextContent();
+    out += tc.items.map(x=>x.str).join(' ') + '\n';
+  }
+  return out.trim();
 }
-function committeeFrom(t){const m=/COMMITTEE ON ([A-Z ,&/-]+)/.exec(t.toUpperCase());
-  return m?m[1].trim():'Unknown';}
-function addTOC(t,id){
-  const li=document.createElement('li'); li.textContent=t;
+function committeeFrom(t){
+  const m=/COMMITTEE ON ([A-Z ,&/-]+)/.exec(t.toUpperCase());
+  return m?m[1].trim():'Unknown';
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+/* ===== UI builders ===== */
+function addTOC(text,id){
+  const li=document.createElement('li'); li.textContent=text;
   li.onclick=()=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
-  tocEl.appendChild(li);
+  tocUl.appendChild(li);
 }
 function renderSection(id,title,text,committee){
-  const det=document.createElement('details'); det.id=id;
-  det.innerHTML=`
-   <summary><header><h3>${title}</h3><span class="tag">${committee}</span>
-   <button class="askBtn" type="button">Ask ChatGPT</button></header></summary>
+  const det=document.createElement('details');
+  det.id=id;
+  det.innerHTML=
+  `<summary>
+     <header>
+       <h3>${title}</h3>
+       <span class="tag">${committee}</span>
+       <button class="askBtn" type="button">Ask ChatGPT</button>
+     </header>
+   </summary>
    <pre>${escapeHtml(text)}</pre>`;
   det.querySelector('.askBtn').onclick=()=>askChatGPT(text);
   content.appendChild(det);
@@ -143,34 +179,43 @@ function renderSection(id,title,text,committee){
 function buildFilters(){
   const committees=[...new Set(sections.map(s=>s.committee))].sort();
   committees.forEach(c=>{
-    const l=document.createElement('label');
-    l.innerHTML=`<input type="checkbox" data-c="${c}" checked> ${c}`;
-    filters.appendChild(l);
+    const label=document.createElement('label');
+    label.innerHTML=`<input type="checkbox" data-c="${c}" checked> ${c}`;
+    filtersDiv.appendChild(label);
   });
-  filters.onchange=()=>{
-    const act=[...filters.querySelectorAll('input:checked')].map(i=>i.dataset.c);
+  filtersDiv.onchange=()=>{
+    const active=[...filtersDiv.querySelectorAll('input:checked')].map(i=>i.dataset.c);
     sections.forEach(s=>{
-      document.getElementById(s.id).hidden=!act.includes(s.committee);
+      document.getElementById(s.id).hidden=!active.includes(s.committee);
     });
   };
 }
 function buildSearch(){
-  fuse=new Fuse(sections,{keys:['title','text'],threshold:0.4,minMatchCharLength:3});
+  fuse = new Fuse(sections,{keys:['title','text'],threshold:0.4,minMatchCharLength:3});
   searchIn.oninput=e=>{
     const q=e.target.value.trim();
     if(!q){sections.forEach(s=>document.getElementById(s.id).hidden=false);return;}
     const hit=new Set(fuse.search(q).map(r=>r.item.id));
-    sections.forEach(s=>document.getElementById(s.id).hidden=!hit.has(s.id));
+    sections.forEach(s=>{
+      document.getElementById(s.id).hidden=!hit.has(s.id);
+    });
   };
 }
-function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({&:'&amp;',<:'&lt;',>:'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-/* ——— ChatGPT helper ——— */
+
+/* ===== ChatGPT link / fallback ===== */
 function askChatGPT(secText){
-  const prompt=encodeURIComponent(`What does this section of the bill mean, and how could it affect me?\n\n${secText}`);
+  const prompt = encodeURIComponent(
+`What does this section of the bill mean, and how could it affect me?\n\n${secText}`);
   const url=`https://chat.openai.com/?input=${prompt}`;
   const w=window.open(url,'_blank');
-  setTimeout(()=>{try{if(!w.location.search.includes('input='))throw 0;}
-    catch{navigator.clipboard.writeText(secText).then(()=>alert('Section text copied – paste into ChatGPT.'));}},1200);
+  setTimeout(()=>{ /* challenge deep-link; fallback copy */
+    try{if(!w.location.search.includes('input='))throw 0;}
+    catch{
+      navigator.clipboard.writeText(secText).then(()=>{
+        alert('Section text copied – paste it into ChatGPT.');
+      });
+    }
+  },1200);
 }
 </script>
 </body>
