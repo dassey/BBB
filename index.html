@@ -1,535 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Bill Explorer</title>
-    
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
-
-    <style>
-        :root {
-            --primary-color: #005A9C;
-            --secondary-color: #FDB81E;
-            --background-color: #f8f9fa;
-            --text-color: #333;
-            --light-gray: #e9ecef;
-            --white: #fff;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --border-radius: 8px;
-            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        body {
-            font-family: var(--font-family);
-            margin: 0;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* --- Sidebar / Table of Contents --- */
-        .sidebar {
-            width: 320px;
-            background-color: var(--white);
-            border-right: 1px solid var(--light-gray);
-            padding: 2rem 1rem;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-
-        .sidebar-header {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--secondary-color);
-        }
-
-        .toc-list, .toc-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .toc-list > li > button {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-        
-        .toc-list button {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 0.75rem 1rem;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            cursor: pointer;
-            border-radius: var(--border-radius);
-            font-size: 0.9rem;
-        }
-
-        .toc-list button:hover {
-            background-color: var(--light-gray);
-        }
-        
-        .toc-list .toc-title > button {
-            font-weight: bold;
-            position: relative;
-        }
-        
-        .toc-list .toc-title > button::after {
-            content: '›';
-            position: absolute;
-            right: 1rem;
-            font-size: 1.5rem;
-            transition: transform 0.2s;
-        }
-
-        .toc-list .toc-title.open > button::after {
-            transform: rotate(90deg);
-        }
-        
-        .toc-list ul {
-            padding-left: 1rem;
-            display: none;
-        }
-        
-        .toc-list .toc-title.open > ul {
-            display: block;
-        }
-
-
-        /* --- Main Content --- */
-        .main-content {
-            margin-left: 320px;
-            padding: 2rem;
-            width: calc(100% - 320px);
-        }
-
-        .controls {
-            background: var(--white);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            margin-bottom: 2rem;
-            position: sticky;
-            top: 1rem;
-            z-index: 999;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--light-gray);
-        }
-        
-        .filters {
-            margin-top: 1rem;
-        }
-        
-        .filter-tag {
-            display: inline-block;
-            background: var(--light-gray);
-            color: var(--text-color);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            margin: 0.25rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            font-size: 0.85rem;
-        }
-        
-        .filter-tag:hover, .filter-tag.active {
-            background-color: var(--primary-color);
-            color: var(--white);
-        }
-
-        .bill-section {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            margin-bottom: 1.5rem;
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        
-        .bill-section.hidden {
-            display: none;
-        }
-
-        .section-header {
-            padding: 1rem 1.5rem;
-            background-color: #fdfdff;
-            border-bottom: 1px solid var(--light-gray);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .section-header h2 {
-            margin: 0;
-            font-size: 1.2rem;
-            color: var(--primary-color);
-        }
-        
-        .section-id {
-            font-family: monospace;
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-
-        .section-body {
-            padding: 1.5rem;
-            white-space: pre-wrap;
-            font-family: "Georgia", serif;
-            font-size: 1.1rem;
-            max-height: 500px;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
-        }
-        
-        .bill-section.collapsed .section-body {
-            max-height: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-
-        .section-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--light-gray);
-            background-color: #fdfdff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .committee-tag {
-            font-size: 0.8rem;
-            font-weight: 500;
-            background-color: var(--light-gray);
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-        }
-
-        .ask-chatgpt-btn {
-            background-color: #10a37f;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-        
-        .ask-chatgpt-btn:hover {
-            background-color: #0d8c6c;
-        }
-        
-        .tooltip {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--border-radius);
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-
-        .tooltip.visible {
-            opacity: 1;
-        }
-
-        /* --- Mobile Responsiveness --- */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-                max-height: 50vh;
-                border-right: none;
-                border-bottom: 1px solid var(--light-gray);
-                box-sizing: border-box;
-            }
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-                padding: 1rem;
-                box-sizing: border-box;
-            }
-            .controls {
-                position: static;
-            }
-            .section-header h2 {
-                font-size: 1.1rem;
-            }
-            .section-body {
-                font-size: 1rem;
-            }
-        }
-    </style>
+<meta charset="utf-8">
+<title>Interactive Bill Viewer – H.R. 1 (EAS)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{
+  --accent:#0057e7; --bg:#fff; --text:#222; --tag:#e0e7ff; --sidebar:270px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--text);}
+header{display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;background:var(--accent);color:#fff;}
+header h1{font-size:1rem;flex:1;margin-inline-start:.25rem;}
+header input{flex:2;max-width:320px;border:0;border-radius:4px;padding:.42rem .6rem;}
+#menuBtn{background:none;border:0;font-size:1.5rem;color:#fff;cursor:pointer;}
+aside{position:fixed;inset-block:0;inset-inline-start:0;width:var(--sidebar);background:#f7f8fb;overflow:auto;transform:translateX(-100%);transition:transform .3s;}
+aside[open]{transform:none;}
+aside h2{padding:1rem .9rem;font-size:1.1rem;border-bottom:1px solid #ddd;}
+#toc ul{list-style:none;padding-inline-start:.9rem;}
+#toc li{padding:.28rem .15rem;cursor:pointer;}
+#toc li:hover{background:#e2e8ff;}
+main{padding:1rem;max-width:60rem;margin-inline:auto;}
+section{margin-block-end:2rem;border-block-end:1px solid #eee;}
+section header{display:flex;align-items:center;gap:.6rem;margin-block-end:.5rem;}
+section header h3{font-size:1.05rem;line-height:1.3;}
+.tag{background:var(--tag);color:#3746bb;font-size:.75rem;padding:.1rem .4rem;border-radius:4px;}
+.askBtn{margin-inline-start:auto;font-size:.8rem;border:1px solid var(--accent);padding:.32rem .6rem;border-radius:3px;background:#fff;color:var(--accent);cursor:pointer;}
+details[open] summary::after{content:"▲";float:inline-end;font-size:.7rem;}
+details summary::after{content:"▼";float:inline-end;font-size:.7rem;}
+summary{list-style:none;}
+.loading{text-align:center;padding:3rem;font-style:italic;}
+#filterBox{display:flex;flex-direction:column;padding:0 .9rem 1rem;}
+#filterBox label{font-size:.82rem;margin-block:.15rem;}
+@media(min-width:768px){
+  aside{transform:none;}
+  main{margin-inline-start:var(--sidebar);}
+}
+</style>
 </head>
 <body>
+<header>
+  <button id="menuBtn" aria-label="Toggle Table of Contents">☰</button>
+  <h1>H.R. 1 (EAS) — 119th Congress</h1>
+  <input id="search" type="search" placeholder="Search full text…">
+</header>
 
-    <div class="container">
-        <nav class="sidebar" id="toc-sidebar">
-            <div class="sidebar-header">Table of Contents</div>
-            <ul class="toc-list" id="toc-list"></ul>
-        </nav>
-        
-        <main class="main-content">
-            <div class="controls">
-                <div class="search-box">
-                    <input type="search" id="search-input" placeholder="🔍 Search the entire bill...">
-                </div>
-                <div class="filters" id="filters-container">
-                    <span class="filter-tag active" data-committee="all">All Committees</span>
-                </div>
-            </div>
-            
-            <div id="bill-content-container">
-                </div>
-        </main>
-    </div>
+<aside id="sidebar">
+  <h2>Table of Contents</h2>
+  <nav id="toc"></nav>
+  <fieldset id="filterBox">
+    <legend>Filter by committee</legend>
+    <div id="filters"></div>
+  </fieldset>
+</aside>
 
-    <div id="tooltip" class="tooltip">Text copied to clipboard!</div>
+<main id="content"><p class="loading">Loading bill…</p></main>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
+<!-- lightweight CDN libs -->
+<script src="https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.min.js"></script>
+<script src="https://unpkg.com/fuse.js@6.6.2"></script>
+<script>
+/*-- PDF.JS worker from the same CDN --*/
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.min.js';
 
-        // --- DATA ---
-        // This data structure is created by parsing the provided PDF text.
-        const billData = [
-            // Note: For brevity, only a few representative sections are included here.
-            // A full implementation would contain all sections from the PDF.
-            {
-                "id": "10101",
-                "titleName": "RE-EVALUATION OF THRIFTY FOOD PLAN.",
-                "committee": "Agriculture, Nutrition, and Forestry",
-                "fullText": `SEC. 10101. RE-EVALUATION OF THRIFTY FOOD PLAN.\n(a) IN GENERAL. Section 3 of the Food and Nutri- tion Act of 2008 (7 U.S.C. 2012) is amended by striking subsection (u) and inserting the following:\n"(u) THRIFTY FOOD PLAN.-\n"(1) IN GENERAL. The term 'thrifty food plan' means the diet required to feed a family of 4 persons consisting of a man and a woman ages 20 through 50, a child ages 6 through 8, and a child ages 9 through 11 using the items and quantities of food described in the report of the Department of Agriculture entitled 'Thrifty Food Plan, 2021', and each successor report updated pursuant to this subsection, subject to the conditions that-\n"(A) the relevant market baskets of the thrifty food plan shall only be changed pursuant to paragraph (4);\n"(B) the cost of the thrifty food plan shall be the basis for uniform allotments for all house- holds, regardless of the actual composition of the household; and\n"(C) the cost of the thrifty food plan may only be adjusted in accordance with this sub- section.\n... [and so on for the full section text]"`
-            },
-            {
-                "id": "10102",
-                "titleName": "MODIFICATIONS TO SNAP WORK REQUIREMENTS FOR ABLE-BODIED ADULTS.",
-                "committee": "Agriculture, Nutrition, and Forestry",
-                "fullText": `SEC. 10102. MODIFICATIONS TO SNAP WORK REQUIRE- MENTS FOR ABLE-BODIED ADULTS.\n(a) EXCEPTIONS. - Section 6(0) of the Food and Nutri- tion Act of 2008 (7 U.S.C. 2015(0)) is amended by striking paragraph (3) and inserting the following:\n"(3) EXCEPTIONS. - Paragraph (2) shall not apply to an individual if the individual is-\n"(A) under 18, or over 65, years of age;\n"(B) medically certified as physically or mentally unfit for employment;\n"(C) a parent or other member of a house- hold with responsibility for a dependent child under 14 years of age; ... [full text]"`
-            },
-            {
-                "id": "20001",
-                "titleName": "ENHANCEMENT OF DEPARTMENT OF DEFENSE RESOURCES FOR IMPROVING THE QUALITY OF LIFE FOR MILITARY PERSONNEL.",
-                "committee": "Armed Services",
-                "fullText": `SEC. 20001. ENHANCEMENT OF DEPARTMENT OF DEFENSE RESOURCES FOR IMPROVING THE QUALITY OF LIFE FOR MILITARY PERSONNEL.\n(a) APPROPRIATIONS. In addition to amounts other- wise available, there are appropriated to the Secretary of Defense for fiscal year 2025, out of any money in the Treas- ury not otherwise appropriated, to remain available until September 30, 2029-\n(1) \$230,480,000 for restoration and moderniza- tion costs under the Marine Corps Barracks 2030 ini- tiative;\n(2) \$119,000,000 for base operating support costs under the Marine Corps; ... [full text]"`
-            },
-            {
-                "id": "70101",
-                "titleName": "Extension and enhancement of reduced rates.",
-                "committee": "Finance",
-                "fullText": `SEC. 70101. EXTENSION AND ENHANCEMENT OF REDUCED RATES.\n(a) IN GENERAL.—Section 1(j)(2) of the Internal Revenue Code of 1986 is amended by striking subparagraph (F).\n(b) EFFECTIVE DATE.—The amendment made by this section shall apply to taxable years beginning after December 31, 2025.`
-            },
-            {
-                "id": "90001",
-                "titleName": "BORDER INFRASTRUCTURE AND WALL SYSTEM.",
-                "committee": "Homeland Security and Governmental Affairs",
-                "fullText": `SEC. 90001. BORDER INFRASTRUCTURE AND WALL SYSTEM.\nIn addition to amounts otherwise available, there is appropriated to the Commissioner of U.S. Customs and Border Protection for fiscal year 2025, out of any money in the Treasury not otherwise appropriated, to remain available until September 30, 2029, \$46,550,000,000 for necessary expenses relating to the following elements of the border infrastructure and wall system: ... [full text]`
-            }
-        ];
-        
-        const tocData = {
-            "TITLE I: Agriculture, Nutrition, and Forestry": [
-                {id: '10101', title: 'Re-evaluation of thrifty food plan.'},
-                {id: '10102', title: 'Modifications to SNAP work requirements.'},
-            ],
-            "TITLE II: Armed Services": [
-                {id: '20001', title: 'Enhancement of DoD resources for quality of life.'},
-            ],
-            "TITLE VII: Finance": [
-                {id: '70101', title: 'Extension and enhancement of reduced rates.'},
-            ],
-            "TITLE IX: Homeland Security and Governmental Affairs": [
-                {id: '90001', title: 'Border infrastructure and wall system.'},
-            ]
-        };
+/* DOM refs */
+const PDF_FILE = 'BILLS-119hr1eas.pdf';
+const sidebar  = document.getElementById('sidebar');
+const menuBtn  = document.getElementById('menuBtn');
+const tocEl    = document.getElementById('toc');
+const content  = document.getElementById('content');
+const searchIn = document.getElementById('search');
+const filtersDiv = document.getElementById('filters');
+menuBtn.onclick = ()=> sidebar.toggleAttribute('open');
 
-        const committees = [...new Set(billData.map(section => section.committee))];
+/* globals */
+let sections=[];          // {id,title,text,start,committee}
 
-        // --- FUSE.JS SEARCH SETUP ---
-        const fuse = new Fuse(billData, {
-            keys: ['id', 'titleName', 'fullText'],
-            includeScore: true,
-            threshold: 0.4,
-            minMatchCharLength: 3,
-        });
+/*———————— 1. Load + outline flatten ————————*/
+(async function init(){
+  const pdf = await pdfjsLib.getDocument(PDF_FILE).promise;
+  const outline = await pdf.getOutline();
+  const flat = await flattenOutline(outline,pdf);           // ordered by page
+  for(let i=0;i<flat.length;i++){
+    const {item,page} = flat[i];
+    const end = (i+1<flat.length) ? flat[i+1].page-1 : pdf.numPages-1;
+    const text = await pagesText(pdf,page,end);
+    const comm = committeeFrom(item.title);
+    const id   = 'p'+page;
+    sections.push({id,title:item.title,text,committee:comm,start:page});
+    renderSection({id,title:item.title,text,committee:comm});
+    addTocEntry(item.title,id);
+  }
+  content.querySelector('.loading')?.remove();
+  buildSearch();
+  buildFilters();
+})();
 
-        // --- DOM ELEMENTS ---
-        const tocList = document.getElementById('toc-list');
-        const contentContainer = document.getElementById('bill-content-container');
-        const searchInput = document.getElementById('search-input');
-        const filtersContainer = document.getElementById('filters-container');
-        const tooltip = document.getElementById('tooltip');
+/*———————— 2. Helpers ————————*/
+async function flattenOutline(items,pdf,arr=[],depth=0){
+  for(const item of (items||[])){
+    const dest = await pdf.getDestination(item.dest);
+    const idx  = await pdf.getPageIndex(dest[0]);  // 0-based
+    arr.push({item,page:idx});
+    if(item.items?.length) await flattenOutline(item.items,pdf,arr,depth+1);
+  }
+  return arr.sort((a,b)=>a.page-b.page);
+}
+async function pagesText(pdf,start,end){
+  let out='';
+  for(let p=start;p<=end;p++){
+    const page = await pdf.getPage(p+1);                 // 1-based accessor
+    const tc   = await page.getTextContent();
+    out += tc.items.map(i=>i.str).join(' ') + '\n';
+  }
+  return out.trim();
+}
+function committeeFrom(title){
+  const m=/COMMITTEE ON ([A-Z ,&/-]+)/.exec(title.toUpperCase());
+  return m ? m[1].trim() : 'Unknown';
+}
 
-        // --- RENDER FUNCTIONS ---
-        function renderTOC() {
-            let html = '';
-            for (const title in tocData) {
-                html += `<li class="toc-title"><button>${title}</button><ul>`;
-                tocData[title].forEach(item => {
-                    html += `<li><button data-scroll-to="section-${item.id}">${item.id}: ${item.title}</button></li>`;
-                });
-                html += `</ul></li>`;
-            }
-            tocList.innerHTML = html;
-        }
-
-        function renderFilters() {
-            committees.forEach(committee => {
-                const tag = document.createElement('span');
-                tag.className = 'filter-tag';
-                tag.dataset.committee = committee;
-                tag.textContent = committee;
-                filtersContainer.appendChild(tag);
-            });
-        }
-        
-        function renderContent(data) {
-            contentContainer.innerHTML = data.map(section => `
-                <div class="bill-section" id="section-${section.id}" data-committee="${section.committee}">
-                    <div class="section-header">
-                        <h2><span class="section-id">SEC. ${section.id}</span> ${section.titleName}</h2>
-                    </div>
-                    <div class="section-body">
-                        ${section.fullText}
-                    </div>
-                    <div class="section-footer">
-                         <span class="committee-tag">${section.committee}</span>
-                         <button class="ask-chatgpt-btn" data-section-id="${section.id}">Ask ChatGPT</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // --- EVENT HANDLERS ---
-        function handleTOCClick(e) {
-            if (e.target.matches('[data-scroll-to]')) {
-                const targetId = e.target.dataset.scrollTo;
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            } else if (e.target.parentElement.classList.contains('toc-title')) {
-                e.target.parentElement.classList.toggle('open');
-            }
-        }
-        
-        function handleFilterClick(e) {
-            if (!e.target.matches('.filter-tag')) return;
-            
-            const selectedCommittee = e.target.dataset.committee;
-            
-            // Update active state on tags
-            document.querySelectorAll('.filter-tag').forEach(tag => {
-                tag.classList.toggle('active', tag.dataset.committee === selectedCommittee);
-            });
-            
-            // Filter content
-            document.querySelectorAll('.bill-section').forEach(section => {
-                const isVisible = selectedCommittee === 'all' || section.dataset.committee === selectedCommittee;
-                section.classList.toggle('hidden', !isVisible);
-            });
-        }
-
-        function handleSearch(e) {
-            const query = e.target.value;
-            if (query.trim() === '') {
-                document.querySelectorAll('.bill-section').forEach(el => el.classList.remove('hidden'));
-                return;
-            }
-
-            const results = fuse.search(query);
-            const resultIds = new Set(results.map(res => `section-${res.item.id}`));
-
-            document.querySelectorAll('.bill-section').forEach(section => {
-                section.classList.toggle('hidden', !resultIds.has(section.id));
-            });
-        }
-
-        function handleAskChatGPT(e) {
-            if (!e.target.matches('.ask-chatgpt-btn')) return;
-
-            const sectionId = e.target.dataset.sectionId;
-            const section = billData.find(s => s.id === sectionId);
-            if (!section) return;
-
-            const promptText = `What does this section of the bill mean, and how could it affect me?\n\n${section.fullText}`;
-
-            navigator.clipboard.writeText(promptText).then(() => {
-                showTooltip("Section text copied – paste it into ChatGPT and ask what it means.");
-                window.open('https://chat.openai.com/', '_blank');
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-                showTooltip("Failed to copy text. Please copy manually.");
-            });
-        }
-        
-        function handleSectionCollapse(e) {
-            const header = e.target.closest('.section-header');
-            if (header) {
-                header.parentElement.classList.toggle('collapsed');
-            }
-        }
-        
-        function showTooltip(message) {
-            tooltip.textContent = message;
-            tooltip.classList.add('visible');
-            setTimeout(() => {
-                tooltip.classList.remove('visible');
-            }, 3000);
-        }
-
-        // --- INITIALIZATION ---
-        function init() {
-            renderTOC();
-            renderFilters();
-            renderContent(billData);
-            
-            // Add initial collapsed state to all sections
-            document.querySelectorAll('.bill-section').forEach(section => {
-                section.classList.add('collapsed');
-            });
-
-            // Attach event listeners
-            tocList.addEventListener('click', handleTOCClick);
-            filtersContainer.addEventListener('click', handleFilterClick);
-            searchInput.addEventListener('input', handleSearch);
-            contentContainer.addEventListener('click', handleAskChatGPT);
-            contentContainer.addEventListener('click', handleSectionCollapse);
-        }
-
-        init();
+/*———————— 3. UI builders ————————*/
+function addTocEntry(title,id){
+  const li=document.createElement('li'); li.textContent=title;
+  li.onclick=()=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
+  tocEl.appendChild(li);
+}
+function renderSection({id,title,text,committee}){
+  const det=document.createElement('details');
+  det.id=id;
+  det.innerHTML=`
+   <summary>
+     <header>
+       <h3>${title}</h3>
+       <span class="tag">${committee}</span>
+       <button class="askBtn" type="button">Ask ChatGPT</button>
+     </header>
+   </summary>
+   <pre>${text.replace(/[&<>"']/g, c=>({&:'&amp;',<:'&lt;',>:'&gt;',"'":'&#39;','"':'&quot;'}[c]))}</pre>`;
+  det.querySelector('.askBtn').onclick=()=>askChatGPT(text);
+  content.appendChild(det);
+}
+function buildFilters(){
+  const committees=[...new Set(sections.map(s=>s.committee))].sort();
+  committees.forEach(c=>{
+    const lab=document.createElement('label');
+    lab.innerHTML=`<input type="checkbox" data-c="${c}" checked> ${c}`;
+    filtersDiv.appendChild(lab);
+  });
+  filtersDiv.onchange=()=>{
+    const act=[...filtersDiv.querySelectorAll('input:checked')].map(i=>i.dataset.c);
+    sections.forEach(s=>{
+      document.getElementById(s.id).hidden = !act.includes(s.committee);
     });
-    </script>
+  };
+}
+function buildSearch(){
+  const fuse=new Fuse(sections,{keys:['title','text'],minMatchCharLength:3,threshold:0.4});
+  searchIn.oninput=e=>{
+    const q=e.target.value.trim();
+    if(!q){sections.forEach(s=>document.getElementById(s.id).hidden=false);return;}
+    const hit=new Set(fuse.search(q).map(r=>r.item.id));
+    sections.forEach(s=>document.getElementById(s.id).hidden=!hit.has(s.id));
+  };
+}
+
+/*———————— 4. ChatGPT button ————————*/
+function askChatGPT(secText){
+  const prompt=encodeURIComponent(
+`What does this section of the bill mean, and how could it affect me?
+
+${secText}`);
+  const url=`https://chat.openai.com/?input=${prompt}`;
+  const win=window.open(url,'_blank');
+  /* fallback after 1.2 s if deep-link discarded */
+  setTimeout(()=>{
+    try{if(!win.location.search.includes('input='))throw 0;}
+    catch(e){
+      navigator.clipboard.writeText(secText).then(()=>{
+        alert('Section text copied – paste it into ChatGPT and ask what it means.');
+      });
+    }
+  },1200);
+}
+</script>
 </body>
 </html>
