@@ -1,275 +1,743 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Interactive PDF Viewer</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-:root{
-  --accent:#0b5cab;          /* header + call-to-action */
-  --accent-light:#e8f0fe;    /* TOC hover + filter chips */
-  --bg:#fefefe;
-  --text:#222;
-  --surface:#ffffff;         /* card / section background */
-  --border:#d9d9d9;
-  --radius:8px;
-  --sidebar:280px;
-  --font:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minecraft‑Style Font Generator (Single‑File)</title>
+  <!--
+    Single‑file HTML+CSS+JS app that replicates the core UX of
+    DesignWorkLife's "Minecraft Font Generator": adjustable canvas size,
+    text input, font size, line height, letter spacing, rotation, position,
+    colors, outline, shadow, background image upload, transparent bg toggle,
+    and PNG/JPEG download. No build tools, no external JS/CSS.
 
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font:15px/1.55 var(--font);color:var(--text);background:var(--bg);}
+    Notes
+    - Default font is a pixel/8‑bit style from Google Fonts (Press Start 2P).
+      To keep this file self‑contained while still allowing a true
+      "Minecraft" look on demand, you may upload any .ttf/.otf/.woff font
+      via the “Font ▸ Upload .TTF/.OTF/.WOFF” control. The uploaded font is
+      used immediately in‑memory without leaving your machine.
+    - Trademark: "Minecraft" is owned by Microsoft/Mojang. This tool merely
+      produces pixelated text effects and ships with an open font by default.
+  -->
+  <style>
+    /* Layout */
+    :root {
+      --bg: #0b0f14;
+      --panel: #131a22;
+      --muted: #7b8a9c;
+      --ink: #e8eef6;
+      --accent: #33d17a; /* greenish */
+      --border: #203042;
+      --danger: #e5534b;
+      --card: #0f141b;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Press Start 2P", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(1200px 800px at 70% -20%, #17202a 0%, var(--bg) 60%);
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      min-height: 100%;
+      align-items: stretch;
+    }
 
-header{
-  display:flex;align-items:center;gap:.6rem;
-  padding:.65rem 1rem;background:var(--accent);color:#fff;
-  box-shadow:0 1px 4px rgba(0,0,0,.18);
-}
-header h1{font-size:1rem;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-header input[type=search]{
-  flex:2;max-width:330px;border:0;border-radius:var(--radius);
-  padding:.46rem .7rem;font-size:.875rem;
-}
-#menuBtn,#uploadLbl{
-  background:none;border:0;color:#fff;font-size:1.55rem;cursor:pointer;
-}
-#uploadLbl{line-height:1;}
+    /* Sidebar */
+    .panel {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .brand h1 { font: 700 16px/1 system-ui, sans-serif; margin: 0; letter-spacing: .3px; }
+    .brand small { color: var(--muted); }
 
-aside{
-  position:fixed;inset-block:0;inset-inline-start:0;
-  width:var(--sidebar);background:#fafbff;border-inline-end:1px solid var(--border);
-  overflow:auto;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
-}
-aside[open]{transform:none;}
-aside h2{padding:1rem 1rem .6rem;font-size:1rem;font-weight:600;}
-#toc ul{list-style:none;margin:0;padding:0;}
-#toc li{
-  padding:.5rem 1rem;font-size:.875rem;cursor:pointer;
-  border-block-end:1px solid var(--border);
-}
-#toc li:hover{background:var(--accent-light);}
-#toc li:active{background:#dbe4ff;}
+    .group { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin: 10px 0; }
+    .group h2 { font: 600 12px/1.2 system-ui, sans-serif; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0 0 8px; }
+    .row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; margin: 8px 0; }
+    .row.inline { grid-template-columns: repeat(3, 1fr); }
+    .row > label { color: #a8b4c2; font-size: 12px; }
 
-main{
-  padding:1rem;max-width:62rem;margin-inline:auto;
-}
-@media(min-width:768px){aside{transform:none;} main{margin-inline-start:var(--sidebar);}}
+    input[type="range"], input[type="number"], input[type="color"], select, textarea, input[type="text"], button {
+      appearance: none; -webkit-appearance: none; background: #0b1016; color: var(--ink); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font: inherit;
+    }
+    input[type="range"] { height: 28px; padding: 0; }
+    input[type="number"], input[type="text"] { width: 100px; text-align: right; }
+    input[type="color"] { padding: 0; width: 40px; height: 28px; border-radius: 8px; }
+    textarea { width: 100%; min-height: 86px; resize: vertical; }
+    select { width: 100%; }
 
-section{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  margin-block-end:1.25rem;overflow:hidden;
-}
-details summary{list-style:none;cursor:pointer;padding:.85rem 1rem;user-select:none;}
-details summary:hover{background:#f2f6ff;}
-details[open] summary{border-block-end:1px solid var(--border);}
-details[open] summary::after,details summary::after{
-  content:"▸";float:inline-end;font-size:.75rem;transition:.2s;
-}
-details[open] summary::after{transform:rotate(90deg);}
-section header{
-  display:flex;align-items:center;gap:.6rem;
-}
-section header h3{font-size:1rem;line-height:1.35;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tag{
-  background:var(--accent-light);color:var(--accent);font-size:.72rem;
-  padding:.15rem .55rem;border-radius:999px;font-weight:500;
-}
-.askBtn{
-  border:1px solid var(--accent);background:#fff;color:var(--accent);
-  font-size:.72rem;padding:.3rem .65rem;border-radius:var(--radius);cursor:pointer;
-}
-.askBtn:hover{background:#edf4ff;}
+    .switch { display: inline-flex; align-items: center; gap: 8px; }
+    .switch input { width: 42px; height: 24px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); cursor: pointer; background: #0b1016; transition: 120ms all ease-in-out;
+    }
+    .btn:hover { background: #0f1720; }
+    .btn.primary { background: linear-gradient(180deg, #1f2b37, #10161d); border-color: #1c2835; }
+    .btn.green { background: linear-gradient(180deg, #1b3b29, #0d1c12); border-color: #214d31; }
 
-pre{
-  font-family:ui-monospace,monospace;font-size:.82rem;
-  padding:1rem 1.15rem;white-space:pre-wrap;word-break:break-word;
-  background:#fcfcfc;
-}
+    .row .btn { padding: 8px 10px; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { padding: 6px 9px; border-radius: 999px; border: 1px solid var(--border); cursor: pointer; background: #0c1117; }
+    .chip.active { outline: 2px solid var(--accent); }
 
-#filterBox{
-  padding:1rem;border-block-start:1px solid var(--border);
-  font-size:.8rem;display:flex;flex-direction:column;gap:.3rem;
-}
-#filterBox legend{font-weight:600;padding-inline:0 0;}
-#filterBox label{display:flex;gap:.4rem;align-items:center;cursor:pointer;}
-#filterBox input{accent-color:var(--accent);}
-.loading,.error{text-align:center;padding:2.5rem;font-style:italic;font-size:.9rem;}
-.error{color:#c00;}
-</style>
+    /* Canvas area */
+    .stageWrap { position: relative; padding: 16px; }
+    .stageBar { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 10px 0; }
+    .stage {
+      position: relative; background: repeating-conic-gradient(#0b0f14 0 25%, #0f141b 0 50%) 50%/24px 24px; border: 1px solid var(--border); border-radius: var(--radius);
+      display: grid; place-items: center; overflow: hidden; 
+    }
+    canvas { image-rendering: pixelated; }
+
+    .ghost { position: absolute; inset: 0; pointer-events: none; display: grid; place-items: center; }
+    .crosshair::before, .crosshair::after {
+      content: ""; position: absolute; background: rgba(255,255,255,.08);
+    }
+    .crosshair::before { width: 2px; height: 100%; }
+    .crosshair::after { width: 100%; height: 2px; }
+
+    .kbd { font: 500 11px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #0c1218; border: 1px solid var(--border); padding: 2px 6px; border-radius: 6px; }
+    .muted { color: var(--muted); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .tiny { font-size: 11px; }
+  </style>
+  <style>
+    /* Load a pixel‑style default font via Google Fonts (still one file; network fetch is allowed). */
+    @font-face {
+      font-family: 'Press Start 2P';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url(https://fonts.gstatic.com/s/pressstart2p/v15/e3t4euO8T-267oIAQAu6jDQyK3nVivM.woff2) format('woff2');
+      /* SIL Open Font License (via Google Fonts). */
+    }
+  </style>
 </head>
 <body>
-<header>
-  <button id="menuBtn" aria-label="Toggle Table of Contents">☰</button>
-  <h1 id="docTitle">PDF Viewer</h1>
-  <input id="search" type="search" placeholder="Search full text…">
-  <label id="uploadLbl" for="fileInput" title="Open PDF">📂</label>
-  <input id="fileInput" type="file" accept="application/pdf">
-</header>
+  <div class="app">
+    <aside class="panel" id="controls">
+      <div class="brand">
+        <h1>Minecraft‑Style Generator</h1>
+        <small class="muted">Single‑file</small>
+      </div>
 
-<aside id="sidebar">
-  <h2>Table&nbsp;of&nbsp;Contents</h2>
-  <nav id="toc"><ul></ul></nav>
-  <fieldset id="filterBox"><legend>Filter by committee</legend><div id="filters"></div></fieldset>
-</aside>
+      <div class="group">
+        <h2>Text</h2>
+        <textarea id="text" placeholder="Type your text here…">MINECRAFT</textarea>
+        <div class="row"><label for="fontFamily">Font</label>
+          <select id="fontFamily">
+            <option>Press Start 2P</option>
+            <option>system-ui</option>
+            <option>ui-monospace</option>
+          </select>
+        </div>
+        <div class="row"><label>Upload .TTF/.OTF/.WOFF</label>
+          <input type="file" id="fontUpload" accept=".ttf,.otf,.woff,.woff2" />
+        </div>
+        <div class="grid3">
+          <button class="btn" id="boldBtn" title="Bold"><strong>B</strong></button>
+          <button class="btn" id="italicBtn" title="Italic"><em>I</em></button>
+          <button class="btn" id="aaBtn" title="Pixelate Text Rendering">AA</button>
+        </div>
+      </div>
 
-<main id="content"><p class="loading">Tap 📂 to load a PDF…</p></main>
+      <div class="group">
+        <h2>Typography</h2>
+        <div class="row"><label for="fontSize">Font Size</label>
+          <input type="range" id="fontSize" min="12" max="220" value="56" />
+          <input type="number" id="fontSizeN" min="12" max="600" value="56" />
+        </div>
+        <div class="row"><label for="lineHeight">Line Height</label>
+          <input type="range" id="lineHeight" min="0.7" max="2" step="0.05" value="1.1" />
+          <input type="number" id="lineHeightN" min="0.6" max="3" step="0.05" value="1.1" />
+        </div>
+        <div class="row"><label for="letterSpacing">Letter Spacing (px)</label>
+          <input type="range" id="letterSpacing" min="-5" max="40" value="2" />
+          <input type="number" id="letterSpacingN" min="-20" max="100" value="2" />
+        </div>
+        <div class="row"><label for="rotation">Text Rotation (°)</label>
+          <input type="range" id="rotation" min="-45" max="45" step="1" value="0" />
+          <input type="number" id="rotationN" min="-180" max="180" step="1" value="0" />
+        </div>
+        <div class="grid3">
+          <div class="row"><label>Align</label>
+            <select id="alignH">
+              <option value="center">Center</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+          <div class="row"><label>Vertical</label>
+            <select id="alignV">
+              <option value="middle">Middle</option>
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+            </select>
+          </div>
+          <div class="row"><label>Wrap</label>
+            <select id="wrapMode">
+              <option value="newline">Manual (\n)</option>
+              <option value="word">Word wrap</option>
+              <option value="none">No wrap</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-<!-- ─────── local pdf.js runtime + worker ─────── -->
-<script src="build/pdf.min.js"></script>
-<script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'build/pdf.worker.min.js';
-</script>
+      <div class="group">
+        <h2>Colors</h2>
+        <div class="row"><label for="fontColor">Font Color</label>
+          <input type="color" id="fontColor" value="#00ff66" />
+        </div>
+        <div class="row"><label for="outlineColor">Outline</label>
+          <input type="color" id="outlineColor" value="#000000" />
+          <input type="range" id="outlineWidth" min="0" max="20" value="2" />
+        </div>
+        <div class="row"><label for="shadowColor">Shadow</label>
+          <input type="color" id="shadowColor" value="#000000" />
+          <input type="range" id="shadowDistance" min="0" max="60" value="7" />
+        </div>
+        <div class="row"><label for="shadowBlur">Shadow Blur</label>
+          <input type="range" id="shadowBlur" min="0" max="40" value="0" />
+          <input type="number" id="shadowAngle" min="0" max="360" value="45" title="Shadow angle (degrees)" />
+        </div>
+      </div>
 
-<!-- search library -->
-<script src="https://unpkg.com/fuse.js@7.1.0"></script>
+      <div class="group">
+        <h2>Background</h2>
+        <div class="row"><label>Transparent BG</label>
+          <label class="switch"><input type="checkbox" id="bgTransparent" /> <span class="tiny muted">PNG supports transparency</span></label>
+        </div>
+        <div class="row"><label for="bgColor">Solid Color</label>
+          <input type="color" id="bgColor" value="#0a0a0a" />
+        </div>
+        <div class="row"><label>Image</label>
+          <input type="file" id="bgUpload" accept="image/*" />
+        </div>
+        <div class="grid3">
+          <div class="row"><label>Image Fit</label>
+            <select id="bgFit">
+              <option value="cover">Cover</option>
+              <option value="contain">Contain</option>
+              <option value="stretch">Stretch</option>
+              <option value="tile">Tile</option>
+            </select>
+          </div>
+          <div class="row"><label>Opacity</label>
+            <input type="range" id="bgOpacity" min="0" max="1" step="0.05" value="1" />
+          </div>
+          <div class="row"><label>Blur (px)</label>
+            <input type="range" id="bgBlur" min="0" max="20" step="1" value="0" />
+          </div>
+        </div>
+      </div>
 
-<script>
-/* ─────── DOM refs ─────── */
-const sidebar   = document.getElementById('sidebar');
-const menuBtn   = document.getElementById('menuBtn');
-const tocUl     = document.querySelector('#toc ul');
-const content   = document.getElementById('content');
-const searchBox = document.getElementById('search');
-const filters   = document.getElementById('filters');
-const fileIn    = document.getElementById('fileInput');
-const titleEl   = document.getElementById('docTitle');
-menuBtn.onclick = () => sidebar.toggleAttribute('open');
+      <div class="group">
+        <h2>Canvas & Position</h2>
+        <div class="row"><label for="canvasW">Canvas Width</label>
+          <input type="range" id="canvasW" min="200" max="2000" value="560" />
+          <input type="number" id="canvasWn" min="64" max="4096" value="560" />
+        </div>
+        <div class="row"><label for="canvasH">Canvas Height</label>
+          <input type="range" id="canvasH" min="200" max="2000" value="560" />
+          <input type="number" id="canvasHn" min="64" max="4096" value="560" />
+        </div>
+        <div class="row"><label>Drag text on canvas</label><span class="tiny muted">Hold <span class="kbd">Shift</span> to constrain</span></div>
+        <div class="grid3">
+          <div class="row"><label>X (%)</label><input type="range" id="posX" min="0" max="100" value="50" /></div>
+          <div class="row"><label>Y (%)</label><input type="range" id="posY" min="0" max="100" value="50" /></div>
+          <div class="row"><label>Reset</label><button class="btn" id="resetBtn">Reset</button></div>
+        </div>
+      </div>
 
-/* ─────── state ─────── */
-let sections=[], fuse;
+      <div class="group">
+        <h2>Export</h2>
+        <div class="grid3">
+          <button class="btn primary" id="downloadPNG">Download PNG</button>
+          <button class="btn" id="downloadJPG">Download JPG</button>
+          <button class="btn danger" id="clearBG">Clear BG Img</button>
+        </div>
+      </div>
 
-/* ─────── file upload ─────── */
-fileIn.addEventListener('change', async e=>{
-  const file=e.target.files[0];
-  if(!file) return;
-  titleEl.textContent=file.name;
-  const buf=await file.arrayBuffer();
-  loadPDF({data:buf});
-});
+      <p class="tiny muted">Tip: For a classic Minecraft look, use bright lime text, black outline, hard 45° shadow, and a simple dark background.</p>
+    </aside>
 
-/* ─────── main loader ─────── */
-async function loadPDF(src){
-  sections.length=0;
-  tocUl.innerHTML='';
-  filters.innerHTML='';
-  searchBox.value='';
-  content.innerHTML='<p class="loading">Parsing PDF… please wait</p>';
+    <main class="stageWrap">
+      <div class="stageBar">
+        <span class="muted">Canvas Preview</span>
+        <span class="tiny muted">Click & drag to reposition text</span>
+      </div>
+      <div class="stage" id="stage">
+        <canvas id="canvas" width="560" height="560" aria-label="Output canvas"></canvas>
+        <div class="ghost crosshair" aria-hidden="true"></div>
+      </div>
+    </main>
+  </div>
 
-  try{
-    const pdf=await pdfjsLib.getDocument(src).promise;
-    const outline=await pdf.getOutline();
-    const flat=outline?await flatten(outline,pdf):await pageFallback(pdf);
+  <script>
+    // --- State ---
+    const S = {
+      text: 'MINECRAFT',
+      fontFamily: 'Press Start 2P',
+      uploadedFontFamily: null, // set after user uploads any font
+      size: 56,
+      lineHeight: 1.1,
+      letterSpacing: 2,
+      rotation: 0, // degrees
+      bold: false,
+      italic: false,
+      pixelateText: false, // AA toggle simulation using offscreen scaling
+      alignH: 'center',
+      alignV: 'middle',
+      wrapMode: 'newline',
+      color: '#00ff66',
+      outline: { color: '#000000', width: 2 },
+      shadow: { color: '#000000', distance: 7, blur: 0, angle: 45 },
+      bg: { transparent: false, color: '#0a0a0a', image: null, fit: 'cover', opacity: 1, blur: 0 },
+      canvas: { w: 560, h: 560 },
+      pos: { xPct: 50, yPct: 50 },
+    };
 
-    for(const ent of flat){
-      const txt=await getText(pdf,ent.start,ent.end);
-      const com=committee(ent.title);
-      sections.push({id:ent.id,title:ent.title,text:txt,committee:com});
-      addTOC(ent.title,ent.id);
-      addSection(ent.id,ent.title,txt,com);
+    // --- DOM ---
+    const $ = (sel) => document.querySelector(sel);
+    const canvas = $('#canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Inputs
+    const textEl = $('#text');
+    const fontFamilyEl = $('#fontFamily');
+    const fontUploadEl = $('#fontUpload');
+    const boldBtn = $('#boldBtn');
+    const italicBtn = $('#italicBtn');
+    const aaBtn = $('#aaBtn');
+
+    const sizeR = $('#fontSize'), sizeN = $('#fontSizeN');
+    const lhR = $('#lineHeight'), lhN = $('#lineHeightN');
+    const lsR = $('#letterSpacing'), lsN = $('#letterSpacingN');
+    const rotR = $('#rotation'), rotN = $('#rotationN');
+    const alignH = $('#alignH'), alignV = $('#alignV');
+    const wrapMode = $('#wrapMode');
+
+    const fontColor = $('#fontColor');
+    const outlineColor = $('#outlineColor');
+    const outlineWidth = $('#outlineWidth');
+    const shadowColor = $('#shadowColor');
+    const shadowDistance = $('#shadowDistance');
+    const shadowBlur = $('#shadowBlur');
+    const shadowAngle = $('#shadowAngle');
+
+    const bgTransparent = $('#bgTransparent');
+    const bgColor = $('#bgColor');
+    const bgUpload = $('#bgUpload');
+    const bgFit = $('#bgFit');
+    const bgOpacity = $('#bgOpacity');
+    const bgBlur = $('#bgBlur');
+
+    const canvasW = $('#canvasW'), canvasWn = $('#canvasWn');
+    const canvasH = $('#canvasH'), canvasHn = $('#canvasHn');
+    const posX = $('#posX'), posY = $('#posY');
+    const resetBtn = $('#resetBtn');
+
+    const dlPNG = $('#downloadPNG');
+    const dlJPG = $('#downloadJPG');
+    const clearBG = $('#clearBG');
+
+    // --- Helpers ---
+    function syncPair(range, number, key, target = S) {
+      const sync = (e) => {
+        const val = parseFloat(e.target.value);
+        target[key] = isNaN(val) ? target[key] : val;
+        range.value = target[key];
+        number.value = target[key];
+        render();
+      };
+      range.addEventListener('input', sync);
+      number.addEventListener('input', sync);
     }
-    buildFilters();
-    buildSearch();
-    content.querySelector('.loading')?.remove();
-  }catch(err){
-    console.error(err);
-    content.innerHTML=`<p class="error">❌ Unable to load PDF: ${err.message}</p>`;
-  }
-}
 
-/* ─────── helpers ─────── */
-async function flatten(items,pdf,out=[]){
-  for(const it of items||[]){
-    const dest=await pdf.getDestination(it.dest);
-    const idx =await pdf.getPageIndex(dest[0]);
-    out.push({title:it.title.trim(),start:idx});
-    if(it.items?.length) await flatten(it.items,pdf,out);
-  }
-  out.sort((a,b)=>a.start-b.start);
-  for(let i=0;i<out.length;i++){
-    out[i].end = (i+1<out.length)?out[i+1].start-1:(await pdf.numPages)-1;
-    out[i].id  ='s'+out[i].start;
-  }
-  return out;
-}
-async function pageFallback(pdf){
-  const n=await pdf.numPages;
-  return Array.from({length:n},(_,i)=>({id:'p'+i,title:'Page '+(i+1),start:i,end:i}));
-}
-async function getText(pdf,start,end){
-  let t='';
-  for(let p=start;p<=end;p++){
-    const tc=await (await pdf.getPage(p+1)).getTextContent();
-    t+=tc.items.map(x=>x.str).join(' ')+'\n';
-  }
-  return t.trim();
-}
-function committee(t){
-  const m=/COMMITTEE ON ([A-Z ,&/-]+)/.exec(t.toUpperCase());
-  return m?m[1].trim():'Unknown';
-}
-function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function deg2rad(d){ return d * Math.PI / 180; }
 
-/* ─────── UI builders ─────── */
-function addTOC(text,id){
-  const li=document.createElement('li'); li.textContent=text;
-  li.onclick=()=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
-  tocUl.appendChild(li);
-}
-function addSection(id,title,text,committee){
-  const d=document.createElement('details'); d.id=id;
-  d.innerHTML=
-  `<summary>
-     <header>
-       <h3>${title}</h3>
-       <span class="tag">${committee}</span>
-       <button class="askBtn" type="button">Ask ChatGPT</button>
-     </header>
-   </summary>
-   <pre>${esc(text)}</pre>`;
-  d.querySelector('.askBtn').onclick=()=>askChatGPT(text);
-  content.appendChild(d);
-}
-function buildFilters(){
-  const list=[...new Set(sections.map(s=>s.committee))].sort();
-  list.forEach(c=>{
-    const l=document.createElement('label');
-    l.innerHTML=`<input type="checkbox" data-c="${c}" checked> ${c}`;
-    filters.appendChild(l);
-  });
-  filters.onchange=()=>{
-    const active=[...filters.querySelectorAll('input:checked')].map(i=>i.dataset.c);
-    sections.forEach(s=>{
-      document.getElementById(s.id).hidden=!active.includes(s.committee);
-    });
-  };
-}
-function buildSearch(){
-  fuse=new Fuse(sections,{keys:['title','text'],threshold:0.4,minMatchCharLength:3});
-  searchBox.oninput=e=>{
-    const q=e.target.value.trim();
-    if(!q){sections.forEach(s=>document.getElementById(s.id).hidden=false);return;}
-    const hit=new Set(fuse.search(q).map(r=>r.item.id));
-    sections.forEach(s=>{
-      document.getElementById(s.id).hidden=!hit.has(s.id);
-    });
-  };
-}
+    function setFontOn(ctx, px) {
+      const style = `${S.italic ? 'italic ' : ''}${S.bold ? '700 ' : ''}${px}px "${S.uploadedFontFamily || S.fontFamily}"`;
+      ctx.font = style;
+      ctx.textBaseline = 'top';
+    }
 
-/* ─────── ChatGPT helper ─────── */
-function askChatGPT(sec){
-  const prompt=encodeURIComponent(
-`What does this section of the bill mean, and how could it affect me?\n\n${sec}`);
-  const url=`https://chat.openai.com/?input=${prompt}`;
-  const w=window.open(url,'_blank');
-  setTimeout(()=>{
-    try{if(!w.location.search.includes('input='))throw 0;}
-    catch{
-      navigator.clipboard.writeText(sec).then(()=>{
-        alert('Section text copied – paste it into ChatGPT.');
+    function measureLineWidth(line, context) {
+      // Manual letter‑spacing, measuring char by char.
+      let w = 0;
+      for (const ch of line) {
+        w += context.measureText(ch).width + S.letterSpacing;
+      }
+      if (line.length > 0) w -= S.letterSpacing; // remove trailing extra spacing
+      return w;
+    }
+
+    function splitLines(text, maxWidth, context) {
+      if (S.wrapMode === 'newline') return text.split(/\n/);
+      if (S.wrapMode === 'none') return [text.replace(/\n/g, ' ')];
+      // Simple word wrap
+      const words = text.replace(/\n/g, ' ').split(/\s+/);
+      const lines = [];
+      let line = '';
+      for (const w of words) {
+        const test = line ? line + ' ' + w : w;
+        const width = measureLineWidth(test, context);
+        if (width > maxWidth && line) { lines.push(line); line = w; }
+        else line = test;
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function drawTextLayer(off, offCtx) {
+      setFontOn(offCtx, S.size);
+      offCtx.fillStyle = S.color;
+      const lines = splitLines(S.text, off.width * 0.9, offCtx);
+
+      // compute metrics
+      let maxW = 0;
+      for (const ln of lines) maxW = Math.max(maxW, measureLineWidth(ln, offCtx));
+      const lineAdvance = S.size * S.lineHeight;
+      const blockH = Math.max(lineAdvance, lines.length * lineAdvance);
+
+      // alignment origin inside offscreen canvas
+      let x0 = 0;
+      if (S.alignH === 'center') x0 = (off.width - maxW) / 2;
+      else if (S.alignH === 'right') x0 = (off.width - maxW) - 2;
+      else x0 = 2;
+
+      let y0 = 0;
+      if (S.alignV === 'middle') y0 = (off.height - blockH) / 2;
+      else if (S.alignV === 'bottom') y0 = (off.height - blockH) - 2;
+      else y0 = 2;
+
+      // Shadow
+      offCtx.shadowColor = S.shadow.color;
+      const ang = deg2rad(S.shadow.angle);
+      offCtx.shadowOffsetX = Math.cos(ang) * S.shadow.distance;
+      offCtx.shadowOffsetY = Math.sin(ang) * S.shadow.distance;
+      offCtx.shadowBlur = S.shadow.blur;
+
+      // Outline
+      offCtx.lineJoin = 'round';
+      offCtx.lineWidth = Math.max(0, +S.outline.width);
+      offCtx.strokeStyle = S.outline.color;
+
+      // Draw
+      let y = y0;
+      for (const ln of lines) {
+        let x = x0;
+        for (const ch of ln) {
+          if (S.outline.width > 0) offCtx.strokeText(ch, x, y);
+          offCtx.fillText(ch, x, y);
+          x += offCtx.measureText(ch).width + S.letterSpacing;
+        }
+        y += lineAdvance;
+      }
+    }
+
+    function drawBackground(ctx, w, h) {
+      // Transparent
+      if (!S.bg.transparent) {
+        ctx.fillStyle = S.bg.color;
+        ctx.fillRect(0,0,w,h);
+      } else {
+        ctx.clearRect(0,0,w,h);
+      }
+
+      if (!S.bg.image) return;
+
+      // Optional blur via offscreen
+      const img = S.bg.image;
+      const tmp = document.createElement('canvas');
+      tmp.width = w; tmp.height = h;
+      const tctx = tmp.getContext('2d');
+      tctx.imageSmoothingEnabled = true;
+
+      const aspectC = w / h, aspectI = img.width / img.height;
+      let dx=0, dy=0, dw=w, dh=h;
+      if (S.bg.fit === 'cover') {
+        if (aspectI > aspectC) { dh = h; dw = h * aspectI; dx = (w - dw)/2; dy = 0; }
+        else { dw = w; dh = w / aspectI; dx = 0; dy = (h - dh)/2; }
+      } else if (S.bg.fit === 'contain') {
+        if (aspectI > aspectC) { dw = w; dh = w / aspectI; dx = 0; dy = (h - dh)/2; }
+        else { dh = h; dw = h * aspectI; dx = (w - dw)/2; dy = 0; }
+      } else if (S.bg.fit === 'stretch') {
+        dx=0; dy=0; dw=w; dh=h;
+      }
+
+      if (S.bg.fit === 'tile') {
+        const patt = tctx.createPattern(img, 'repeat');
+        tctx.globalAlpha = S.bg.opacity;
+        tctx.fillStyle = patt;
+        tctx.fillRect(0,0,w,h);
+      } else {
+        tctx.globalAlpha = S.bg.opacity;
+        tctx.drawImage(img, dx, dy, dw, dh);
+      }
+
+      if (S.bg.blur > 0) {
+        // Cheap blur: scale down then up
+        const s = Math.max(1, Math.round(12 / Math.max(1, S.bg.blur)));
+        const smallW = Math.max(1, Math.round(w / s));
+        const smallH = Math.max(1, Math.round(h / s));
+        const small = document.createElement('canvas'); small.width = smallW; small.height = smallH;
+        const sctx = small.getContext('2d');
+        sctx.imageSmoothingEnabled = true;
+        sctx.drawImage(tmp, 0,0, smallW, smallH);
+        tctx.clearRect(0,0,w,h);
+        tctx.imageSmoothingEnabled = true;
+        tctx.drawImage(small, 0,0, smallW, smallH, 0,0, w,h);
+      }
+
+      ctx.drawImage(tmp, 0,0);
+    }
+
+    function render() {
+      // Resize canvas if needed
+      if (canvas.width !== S.canvas.w || canvas.height !== S.canvas.h) {
+        canvas.width = S.canvas.w; canvas.height = S.canvas.h;
+      }
+
+      const w = canvas.width, h = canvas.height;
+      ctx.save();
+      drawBackground(ctx, w, h);
+
+      // Build a text layer in an offscreen canvas
+      const off = document.createElement('canvas');
+      // Give generous gutters so shadows/outlines aren’t clipped
+      off.width = Math.max(64, Math.round(w));
+      off.height = Math.max(64, Math.round(h));
+      const offCtx = off.getContext('2d');
+
+      // Optionally simulate "pixelated" text by drawing bigger then downscaling
+      const scale = S.pixelateText ? 2 : 1;
+      offCtx.scale(scale, scale);
+      drawTextLayer(off, offCtx);
+
+      // Figure draw origin from X/Y sliders
+      const anchorX = (S.pos.xPct / 100) * w;
+      const anchorY = (S.pos.yPct / 100) * h;
+
+      ctx.imageSmoothingEnabled = !S.pixelateText; // AA toggle
+
+      // Rotate around anchor and draw the text layer centered at the anchor
+      ctx.translate(anchorX, anchorY);
+      ctx.rotate(deg2rad(S.rotation));
+
+      // compute offset for alignment: we centered inside offscreen already; treat as center
+      const drawX = -off.width / 2;
+      const drawY = -off.height / 2;
+      const dw = off.width, dh = off.height;
+
+      if (S.pixelateText) {
+        // Downscale the double‑res offscreen back to 1x with no smoothing
+        ctx.drawImage(off, 0, 0, dw, dh, drawX, drawY, dw / scale, dh / scale);
+      } else {
+        ctx.drawImage(off, drawX, drawY);
+      }
+
+      ctx.restore();
+    }
+
+    // --- Event wiring ---
+    function bind() {
+      // Text & font
+      textEl.addEventListener('input', () => { S.text = textEl.value; render(); });
+      fontFamilyEl.addEventListener('change', () => { S.fontFamily = fontFamilyEl.value; render(); });
+      fontUploadEl.addEventListener('change', onFontUpload);
+
+      boldBtn.addEventListener('click', () => { S.bold = !S.bold; boldBtn.classList.toggle('chip', true); boldBtn.classList.toggle('active', S.bold); render(); });
+      italicBtn.addEventListener('click', () => { S.italic = !S.italic; italicBtn.classList.toggle('chip', true); italicBtn.classList.toggle('active', S.italic); render(); });
+      aaBtn.addEventListener('click', () => { S.pixelateText = !S.pixelateText; aaBtn.classList.toggle('chip', true); aaBtn.classList.toggle('active', S.pixelateText); render(); });
+
+      syncPair(sizeR, sizeN, 'size');
+      syncPair(lhR, lhN, 'lineHeight');
+      syncPair(lsR, lsN, 'letterSpacing');
+      syncPair(rotR, rotN, 'rotation');
+
+      alignH.addEventListener('change', () => { S.alignH = alignH.value; render(); });
+      alignV.addEventListener('change', () => { S.alignV = alignV.value; render(); });
+      wrapMode.addEventListener('change', () => { S.wrapMode = wrapMode.value; render(); });
+
+      fontColor.addEventListener('input', () => { S.color = fontColor.value; render(); });
+      outlineColor.addEventListener('input', () => { S.outline.color = outlineColor.value; render(); });
+      outlineWidth.addEventListener('input', () => { S.outline.width = +outlineWidth.value || 0; render(); });
+
+      shadowColor.addEventListener('input', () => { S.shadow.color = shadowColor.value; render(); });
+      shadowDistance.addEventListener('input', () => { S.shadow.distance = +shadowDistance.value||0; render(); });
+      shadowBlur.addEventListener('input', () => { S.shadow.blur = +shadowBlur.value||0; render(); });
+      shadowAngle.addEventListener('input', () => { S.shadow.angle = +shadowAngle.value||0; render(); });
+
+      bgTransparent.addEventListener('change', () => { S.bg.transparent = bgTransparent.checked; render(); });
+      bgColor.addEventListener('input', () => { S.bg.color = bgColor.value; render(); });
+      bgUpload.addEventListener('change', onBGUpload);
+      bgFit.addEventListener('change', () => { S.bg.fit = bgFit.value; render(); });
+      bgOpacity.addEventListener('input', () => { S.bg.opacity = +bgOpacity.value; render(); });
+      bgBlur.addEventListener('input', () => { S.bg.blur = +bgBlur.value; render(); });
+
+      syncPair(canvasW, canvasWn, 'w', S.canvas);
+      syncPair(canvasH, canvasHn, 'h', S.canvas);
+      posX.addEventListener('input', () => { S.pos.xPct = +posX.value; render(); });
+      posY.addEventListener('input', () => { S.pos.yPct = +posY.value; render(); });
+      resetBtn.addEventListener('click', () => { Object.assign(S, {
+        text: 'MINECRAFT', size: 56, lineHeight: 1.1, letterSpacing: 2, rotation: 0,
+        alignH: 'center', alignV: 'middle', color: '#00ff66',
+        outline: { color: '#000000', width: 2 },
+        shadow: { color: '#000000', distance: 7, blur: 0, angle: 45 },
+        bg: { transparent: false, color: '#0a0a0a', image: null, fit: 'cover', opacity: 1, blur: 0 },
+        canvas: { w: 560, h: 560 }, pos: { xPct: 50, yPct: 50 },
       });
+        // reset UI controls to defaults
+        textEl.value = S.text; sizeR.value = sizeN.value = S.size; lhR.value = lhN.value = S.lineHeight; lsR.value = lsN.value = S.letterSpacing; rotR.value = rotN.value = S.rotation;
+        alignH.value = S.alignH; alignV.value = S.alignV; wrapMode.value = 'newline';
+        fontColor.value = S.color; outlineColor.value = S.outline.color; outlineWidth.value = S.outline.width;
+        shadowColor.value = S.shadow.color; shadowDistance.value = S.shadow.distance; shadowBlur.value = S.shadow.blur; shadowAngle.value = S.shadow.angle;
+        bgTransparent.checked = S.bg.transparent; bgColor.value = S.bg.color; bgFit.value = S.bg.fit; bgOpacity.value = S.bg.opacity; bgBlur.value = S.bg.blur;
+        canvasW.value = canvasWn.value = S.canvas.w; canvasH.value = canvasHn.value = S.canvas.h; posX.value = S.pos.xPct; posY.value = S.pos.yPct;
+        boldBtn.classList.remove('active'); italicBtn.classList.remove('active'); aaBtn.classList.remove('active'); S.bold = S.italic = S.pixelateText = false;
+        S.fontFamily = 'Press Start 2P'; fontFamilyEl.value = 'Press Start 2P';
+        render();
+      });
+
+      clearBG.addEventListener('click', () => { S.bg.image = null; bgUpload.value = ''; render(); });
+
+      // Dragging within canvas
+      let dragging = false; let start = {x:0,y:0}; let orig = {x: S.pos.xPct, y: S.pos.yPct};
+      canvas.addEventListener('pointerdown', (e) => {
+        dragging = true; canvas.setPointerCapture(e.pointerId);
+        start = {x: e.clientX, y: e.clientY};
+        orig = {x: S.pos.xPct, y: S.pos.yPct};
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = (e.clientX - start.x) / canvas.clientWidth * 100;
+        const dy = (e.clientY - start.y) / canvas.clientHeight * 100;
+        if (e.shiftKey) {
+          // Constrain to dominant axis
+          if (Math.abs(dx) > Math.abs(dy)) { S.pos.xPct = Math.max(0, Math.min(100, orig.x + dx)); }
+          else { S.pos.yPct = Math.max(0, Math.min(100, orig.y + dy)); }
+        } else {
+          S.pos.xPct = Math.max(0, Math.min(100, orig.x + dx));
+          S.pos.yPct = Math.max(0, Math.min(100, orig.y + dy));
+        }
+        posX.value = S.pos.xPct.toFixed(1);
+        posY.value = S.pos.yPct.toFixed(1);
+        render();
+      });
+      const stopDrag = (e)=>{ if (!dragging) return; dragging = false; try{ canvas.releasePointerCapture(e.pointerId);}catch{} };
+      canvas.addEventListener('pointerup', stopDrag);
+      canvas.addEventListener('pointercancel', stopDrag);
+
+      // Downloads
+      dlPNG.addEventListener('click', () => download('png'));
+      dlJPG.addEventListener('click', () => download('jpeg'));
+
+      // Keep the stage element sized to canvas pixels
+      const stage = document.getElementById('stage');
+      const resizeObserver = new ResizeObserver(() => {
+        // Nothing required; the canvas scales with CSS automatically.
+      });
+      resizeObserver.observe(stage);
     }
-  },1200);
-}
-</script>
+
+    async function onFontUpload(ev) {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+      try {
+        const buf = await file.arrayBuffer();
+        const family = `Uploaded-${Date.now()}`;
+        const face = new FontFace(family, buf);
+        await face.load();
+        (document.fonts || new FontFaceSet()).add(face);
+        S.uploadedFontFamily = family;
+        // Show in dropdown implicitly by selecting it
+        fontFamilyEl.value = S.fontFamily = family;
+        render();
+      } catch (err) {
+        alert('Could not load font: ' + err.message);
+      }
+    }
+
+    function onBGUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); S.bg.image = img; render(); };
+      img.src = url;
+    }
+
+    function download(kind='png') {
+      // Draw to a fresh export canvas to avoid CSS scaling artifacts
+      const out = document.createElement('canvas');
+      out.width = S.canvas.w; out.height = S.canvas.h;
+      const cx = out.getContext('2d');
+
+      // Background
+      if (!S.bg.transparent || kind === 'jpeg') {
+        cx.fillStyle = S.bg.color || '#ffffff';
+        cx.fillRect(0,0,out.width,out.height);
+      }
+      if (S.bg.image) {
+        // re-use background painter but into cx
+        const bak = { ...S.bg };
+        const tmpCtx = ctx; // not used
+        drawBackground(cx, out.width, out.height);
+        S.bg = bak;
+      }
+
+      // Text layer again
+      const off = document.createElement('canvas');
+      off.width = out.width; off.height = out.height;
+      const offCtx = off.getContext('2d');
+      const scale = S.pixelateText ? 2 : 1;
+      offCtx.scale(scale, scale);
+      drawTextLayer(off, offCtx);
+
+      const anchorX = (S.pos.xPct / 100) * out.width;
+      const anchorY = (S.pos.yPct / 100) * out.height;
+      cx.save();
+      cx.imageSmoothingEnabled = !S.pixelateText;
+      cx.translate(anchorX, anchorY);
+      cx.rotate(deg2rad(S.rotation));
+      const drawX = -off.width / 2; const drawY = -off.height / 2; const dw = off.width, dh = off.height;
+      if (S.pixelateText) cx.drawImage(off, 0,0,dw,dh, drawX,drawY, dw/scale, dh/scale); else cx.drawImage(off, drawX, drawY);
+      cx.restore();
+
+      const name = `minecraft-style-text.${kind === 'jpeg' ? 'jpg' : 'png'}`;
+      const dataURL = out.toDataURL('image/' + kind, kind === 'jpeg' ? 0.95 : undefined);
+      const a = document.createElement('a'); a.href = dataURL; a.download = name; a.click();
+    }
+
+    // Initialize
+    bind();
+    // Seed UI with initial state
+    textEl.value = S.text; fontFamilyEl.value = S.fontFamily;
+    sizeR.value = sizeN.value = S.size; lhR.value = lhN.value = S.lineHeight; lsR.value = lsN.value = S.letterSpacing; rotR.value = rotN.value = S.rotation;
+    alignH.value = S.alignH; alignV.value = S.alignV; wrapMode.value = S.wrapMode;
+    fontColor.value = S.color; outlineColor.value = S.outline.color; outlineWidth.value = S.outline.width;
+    shadowColor.value = S.shadow.color; shadowDistance.value = S.shadow.distance; shadowBlur.value = S.shadow.blur; shadowAngle.value = S.shadow.angle;
+    bgTransparent.checked = S.bg.transparent; bgColor.value = S.bg.color; bgFit.value = S.bg.fit; bgOpacity.value = S.bg.opacity; bgBlur.value = S.bg.blur;
+    canvasW.value = canvasWn.value = S.canvas.w; canvasH.value = canvasHn.value = S.canvas.h; posX.value = S.pos.xPct; posY.value = S.pos.yPct;
+    render();
+  </script>
 </body>
 </html>
