@@ -3,23 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Minecraft‑Style Font Generator (Single‑File)</title>
-  <!--
-    Single‑file HTML+CSS+JS app that replicates the core UX of
-    DesignWorkLife's "Minecraft Font Generator": adjustable canvas size,
-    text input, font size, line height, letter spacing, rotation, position,
-    colors, outline, shadow, background image upload, transparent bg toggle,
-    and PNG/JPEG download. No build tools, no external JS/CSS.
+  <title>Minecraft‑Style Font Generator</title>
 
-    Notes
-    - Default font is a pixel/8‑bit style from Google Fonts (Press Start 2P).
-      To keep this file self‑contained while still allowing a true
-      "Minecraft" look on demand, you may upload any .ttf/.otf/.woff font
-      via the “Font ▸ Upload .TTF/.OTF/.WOFF” control. The uploaded font is
-      used immediately in‑memory without leaving your machine.
-    - Trademark: "Minecraft" is owned by Microsoft/Mojang. This tool merely
-      produces pixelated text effects and ships with an open font by default.
-  -->
   <style>
     /* Layout */
     :root {
@@ -118,6 +103,12 @@
     .tiny { font-size: 11px; }
   </style>
   <style>
+  @font-face {
+    font-family: 'MCA';
+    src: url('./MCA.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
     /* Load a pixel‑style default font via Google Fonts (still one file; network fetch is allowed). */
     @font-face {
       font-family: 'Press Start 2P';
@@ -145,6 +136,7 @@
             <option>Press Start 2P</option>
             <option>system-ui</option>
             <option>ui-monospace</option>
+            <option>MCA</option>
           </select>
         </div>
         <div class="row"><label>Upload .TTF/.OTF/.WOFF</label>
