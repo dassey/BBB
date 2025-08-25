@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>J.C. Wyatt House — Private Fine Dining in a Restored 1891 Home</title>
+  <meta name="description" content="By-reservation, multi-course fine dining in a beautifully restored 1891 Victorian home in St. Joseph, Missouri. Dinner service Thu–Sat. 24-hour advance reservations required." />
+  <meta name="author" content="J.C. Wyatt House" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="format-detection" content="telephone=no" />
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="J.C. Wyatt House — Private Fine Dining" />
+  <meta property="og:description" content="By-reservation, multi-course fine dining in a restored 1891 Victorian home. Dinner Thu–Sat. 24-hour advance reservations required." />
+  <meta property="og:image" content="hero.jpg" />
+  <meta property="og:url" content="https://www.jcwyatt.net" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <!-- PWA-ish nice-to-haves -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'%3E%3Crect rx='16' width='128' height='128' fill='%239E0704'/%3E%3Ctext x='50%' y='58%' text-anchor='middle' font-family='Georgia,Times,serif' font-size='56' fill='white'%3EJC%3C/text%3E%3C/svg%3E">
+  <!-- Local “web-safe” typography: classy serif + clean sans without external calls -->
+  <style>
+    /* -------------------------
+       Design tokens
+    --------------------------*/
+    :root{
+      --brand:#9E0704;       /* house red (taken from current site) */
+      --brand-2:#B91806;
+      --gold:#C8A96A;
+      --ink:#181818;
+      --muted:#6b6b6b;
+      --paper:#ffffff;
+      --paper-2:#faf7f2;
+      --paper-3:#f3eee6;
+      --edge: rgba(0,0,0,.08);
+      --radius:14px;
+      --shadow: 0 10px 30px rgba(0,0,0,.12);
+      --maxw: 1120px;
+      --space: clamp(.9rem, 1.8vw, 1.25rem);
+      --s-2: clamp(1.75rem, 3.2vw, 2.4rem);
+      --s-3: clamp(2.2rem, 4.4vw, 3rem);
+      --serif: "Georgia", "Times New Roman", Times, serif;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark){
+      html[data-theme="auto"]{
+        --paper:#111214; --paper-2:#14161a; --paper-3:#181b20;
+        --ink:#f4f6f8; --muted:#b1b6be; --edge: rgba(255,255,255,.08);
+        --shadow: 0 20px 50px rgba(0,0,0,.45);
+      }
+    }
+    html[data-theme="dark"]{
+      --paper:#111214; --paper-2:#14161a; --paper-3:#181b20;
+      --ink:#f4f6f8; --muted:#b1b6be; --edge: rgba(255,255,255,.08);
+      --shadow: 0 20px 50px rgba(0,0,0,.45);
+    }
+
+    /* -------------------------
+       Base
+    --------------------------*/
+    *{box-sizing:border-box}
+    html, body{height:100%}
+    body{
+      margin:0; color:var(--ink); background: radial-gradient(1600px 900px at 80% -10%, color-mix(in oklab, var(--gold) 22%, transparent) 0, transparent 60%), var(--paper);
+      font: 16px/1.6 var(--sans);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      text-rendering:optimizeLegibility;
+    }
+    img{max-width:100%; height:auto; display:block}
+    a{color:var(--brand); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{width:100%; max-width:var(--maxw); margin-inline:auto; padding-inline: clamp(16px, 3vw, 28px)}
+    .grid{display:grid; gap: clamp(16px, 2vw, 24px)}
+
+    /* -------------------------
+       Header / navigation
+    --------------------------*/
+    .skip{position:absolute; left:-9999px}
+    .skip:focus{left:16px; top:12px; background:#000; color:#fff; padding:.6rem .8rem; border-radius:10px; z-index:9999}
+    header.site{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(8px) saturate(140%);
+      background: color-mix(in oklab, var(--paper) 86%, transparent);
+      border-bottom: 1px solid var(--edge);
+    }
+    .nav{display:flex; align-items:center; justify-content:space-between; padding: .55rem 0}
+    .brand{display:flex; align-items:center; gap:.75rem; font-weight:800; letter-spacing:.2px; color:var(--ink)}
+    .brandmark{width:34px; height:34px}
+    .navlinks{display:flex; align-items:center; gap:.75rem}
+    .navlinks a{padding:.45rem .65rem; border-radius:10px}
+    .navlinks a:is(:hover,:focus){background: color-mix(in oklab, var(--gold) 16%, transparent)}
+    .menu-btn{display:none}
+    .reserve-btn{
+      display:inline-flex; align-items:center; gap:.5rem;
+      background:linear-gradient(180deg, var(--brand), var(--brand-2));
+      color:#fff; border:1px solid color-mix(in oklab, var(--brand) 70%, black);
+      border-radius:12px; padding:.6rem .9rem; font-weight:700; box-shadow: var(--shadow);
+    }
+    .reserve-btn:hover{filter:brightness(1.02)}
+    @media (max-width: 860px){
+      .menu-btn{display:inline-flex; align-items:center; gap:.5rem; border:1px solid var(--edge); background:transparent; color:inherit; padding:.5rem .7rem; border-radius:10px}
+      .navlinks{position:fixed; inset:auto 0 0 0; background:var(--paper-2); border-top:1px solid var(--edge); padding:1rem; display:grid; gap:.5rem; transform:translateY(100%); transition: transform .25s ease}
+      .navlinks[data-open="true"]{transform:translateY(0)}
+    }
+
+    /* -------------------------
+       Hero
+    --------------------------*/
+    .hero{
+      padding-block: clamp(56px, 11vw, 120px);
+      background:
+        linear-gradient(180deg, color-mix(in oklab, var(--paper) 0%, transparent) 0%, color-mix(in oklab, var(--paper) 65%, transparent) 70%, var(--paper) 100%),
+        url('hero.jpg') center/cover no-repeat; /* TODO: replace hero.jpg with a photo of the parlor or exterior */
+      border-bottom: 1px solid var(--edge);
+    }
+    .hero .inner{display:grid; grid-template-columns: 1.05fr .95fr; gap: clamp(16px, 3vw, 36px); align-items:center}
+    @media (max-width: 980px){ .hero .inner{grid-template-columns: 1fr} }
+    h1{font-family: var(--serif); font-size: var(--s-3); line-height:1.05; letter-spacing:-.01em; margin:0 0 .6rem}
+    .lede{font-size: clamp(1.05rem, 1.4vw, 1.2rem); color:var(--muted); max-width: 60ch}
+    .hero-card{
+      background: color-mix(in oklab, var(--paper-3) 90%, transparent);
+      border:1px solid var(--edge); border-radius: var(--radius); padding: clamp(14px, 2vw, 20px); box-shadow: var(--shadow)
+    }
+    .tag{display:inline-block; font-weight:700; font-size:.85rem; letter-spacing:.04em; text-transform:uppercase; color:var(--brand); background: color-mix(in oklab, var(--gold) 20%, transparent); padding:.35rem .6rem; border-radius:999px}
+
+    /* -------------------------
+       Sections & cards
+    --------------------------*/
+    section{scroll-margin-top:84px; padding-block: clamp(44px, 8vw, 84px)}
+    .hd{display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:.75rem}
+    h2{font-family: var(--serif); font-size: var(--s-2); margin:0}
+    p{margin:.5rem 0}
+    .muted{color:var(--muted)}
+    .cards{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: clamp(16px, 2vw, 22px)}
+    @media (max-width: 980px){ .cards{grid-template-columns: 1fr 1fr} }
+    @media (max-width: 620px){ .cards{grid-template-columns: 1fr} }
+    .card{background:var(--paper-2); border:1px solid var(--edge); border-radius:var(--radius); padding: clamp(14px, 2vw, 20px); box-shadow: var(--shadow)}
+    .card h3{margin:.15rem 0 .25rem; font-size: clamp(1.1rem, 1.5vw, 1.3rem); font-family: var(--serif)}
+    .badge{font-variant-numeric: tabular-nums; background: color-mix(in oklab, var(--gold) 18%, transparent); border:1px solid var(--edge); border-radius:10px; padding:.25rem .5rem}
+
+    /* -------------------------
+       Work/press quotes (stacked media)
+    --------------------------*/
+    .press{display:grid; gap: clamp(12px, 2vw, 16px)}
+    .quote{background:var(--paper-2); border:1px solid var(--edge); border-radius:16px; padding: clamp(14px, 2vw, 22px); box-shadow:var(--shadow); font-style:italic}
+    .quote cite{display:block; margin-top:.5rem; color:var(--muted); font-style:normal}
+
+    /* -------------------------
+       Gallery
+    --------------------------*/
+    .gallery{display:grid; grid-template-columns: repeat(3, 1fr); gap: clamp(8px, 1.4vw, 12px)}
+    @media (max-width: 860px){ .gallery{grid-template-columns: 1fr 1fr} }
+    @media (max-width: 520px){ .gallery{grid-template-columns: 1fr} }
+    .gallery figure{margin:0; overflow:hidden; border-radius: 12px; border:1px solid var(--edge); background:var(--paper-3)}
+    .gallery img{aspect-ratio: 4/3; object-fit: cover; width:100%; transition: transform .5s ease}
+    .gallery img:hover{transform: scale(1.02)}
+    .gallery figcaption{padding:.45rem .6rem; font-size:.95rem; color:var(--muted)}
+
+    /* -------------------------
+       Contact / reservation
+    --------------------------*/
+    form{display:grid; gap:.8rem}
+    input, textarea, select{
+      width:100%; padding:.8rem .9rem; border-radius:12px; border:1px solid var(--edge); background:var(--paper-3); color:inherit;
+    }
+    input:focus, textarea:focus, select:focus{outline:none; box-shadow: 0 0 0 .14rem color-mix(in oklab, var(--brand) 45%, transparent)}
+    textarea{min-height:140px; resize:vertical}
+    .status{min-height:1.2em; font-size:.95rem}
+
+    /* -------------------------
+       Footer
+    --------------------------*/
+    footer{padding-block: 32px; border-top:1px solid var(--edge); background: var(--paper-2)}
+    .foot{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.75rem}
+    .small{font-size:.95rem; color:var(--muted)}
+  </style>
+
+  <!-- Local structured data: Restaurant (by-reservation) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "J.C. Wyatt House",
+    "image": "hero.jpg",
+    "servesCuisine": ["Seasonal", "American", "Contemporary"],
+    "priceRange": "$$$",
+    "acceptsReservations": "Required",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "TO DO:  J.C. Wyatt House Street Address",
+      "addressLocality": "St. Joseph",
+      "addressRegion": "MO",
+      "postalCode": "TO DO",
+      "addressCountry": "US"
+    },
+    "telephone": "TO DO: +1-XXX-XXX-XXXX",
+    "openingHoursSpecification": [{
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Thursday","Friday","Saturday"],
+      "opens": "17:30",
+      "closes": "21:00"
+    }],
+    "url": "https://www.jcwyatt.net",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "500"
+    }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site">
+    <div class="container nav">
+      <a href="#" class="brand" aria-label="J.C. Wyatt House — home">
+        <svg class="brandmark" viewBox="0 0 128 128" aria-hidden="true">
+          <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#9E0704"/><stop offset="1" stop-color="#C8A96A"/></linearGradient></defs>
+          <rect x="8" y="8" width="112" height="112" rx="20" fill="url(#g)"/>
+          <text x="50%" y="57%" text-anchor="middle" font-family="Georgia,Times,serif" font-size="52" fill="white" style="letter-spacing:.02em">JC</text>
+        </svg>
+        <span>J.C. Wyatt House</span>
+      </a>
+      <nav aria-label="Primary">
+        <button class="menu-btn" id="menuBtn" aria-controls="navlinks" aria-expanded="false">Menu</button>
+        <div class="navlinks" id="navlinks" data-open="false">
+          <a href="#about">About</a>
+          <a href="#dining">Dining</a>
+          <a href="#gallery">Gallery</a>
+          <a href="#press">Press</a>
+          <a href="#contact" class="reserve-btn">Reserve</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" role="region" aria-label="By-reservation private dining">
+      <div class="container inner">
+        <div>
+          <span class="tag">By Reservation Only</span>
+          <h1>Private Fine Dining in a Restored 1891 Victorian Home</h1>
+          <p class="lede">
+            Multi-course seasonal menus served in an intimate, historic setting. Dinner service on Thursday, Friday, and Saturday with seatings from 5:30–7:00 PM. 24-hour advance reservations required.
+          </p>
+          <div style="display:flex; gap:.75rem; margin-top:.8rem; flex-wrap:wrap">
+            <a href="#contact" class="reserve-btn" aria-label="Request a reservation">Request a Reservation</a>
+            <a href="#dining" class="" style="padding:.55rem .8rem; border:1px solid var(--edge); border-radius:10px">See Details</a>
+          </div>
+          <p class="small muted" style="margin-top:.6rem">St. Joseph, Missouri • Private events available by arrangement.</p>
+        </div>
+        <aside class="hero-card" aria-label="Highlights">
+          <div class="grid" style="grid-template-columns:1fr 1fr">
+            <div>
+              <h3 style="margin:.1rem 0; font-family:var(--serif)">Accolades</h3>
+              <ul class="muted" style="margin:.2rem 0 0; padding-left:1rem">
+                <li>#1 Private Dining in St. Joseph</li>
+                <li>Tripadvisor Certificate of Excellence, 2014–2024</li>
+              </ul>
+            </div>
+            <div>
+              <h3 style="margin:.1rem 0; font-family:var(--serif)">Service</h3>
+              <ul class="muted" style="margin:.2rem 0 0; padding-left:1rem">
+                <li>Dinner Thu–Sat, 5:30–7:00 PM</li>
+                <li>Close at 9:00 PM</li>
+                <li>Private events by request</li>
+              </ul>
+            </div>
+          </div>
+          <div class="small muted" style="margin-top:.6rem">All dining is by advance reservation.</div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about">
+      <div class="container">
+        <div class="hd">
+          <h2>About the House</h2>
+        </div>
+        <div class="grid" style="grid-template-columns: 1.1fr .9fr">
+          <div class="grid">
+            <p>
+              The J.C. Wyatt House is a meticulously restored 1891 residence offering a singular fine-dining experience. Guests enjoy attentive service, a quiet setting, and a menu crafted to celebrate seasonality and classic technique.
+            </p>
+            <ul class="muted" style="padding-left:1rem">
+              <li>Authentic Victorian ambiance across intimate dining rooms</li>
+              <li>Multi-course menus with thoughtful wine options</li>
+              <li>Reservation-only service to preserve privacy and pace</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong style="font-family:var(--serif)">Essential Information</strong>
+            <ul class="muted" style="padding-left:1rem; margin:.4rem 0 0">
+              <li><span class="badge">Dinner</span> Thu–Sat, seatings 5:30–7:00 PM; close 9:00 PM</li>
+              <li><span class="badge">Reservations</span> 24-hour advance notice required</li>
+              <li><span class="badge">Dress</span> Business casual recommended</li>
+              <li><span class="badge">Parking</span> Street parking available</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DINING -->
+    <section id="dining">
+      <div class="container">
+        <div class="hd">
+          <h2>Dining & Menus</h2>
+          <div class="muted">Representative highlights; menus change seasonally.</div>
+        </div>
+        <div class="cards">
+          <article class="card">
+            <h3>Seasonal Tasting</h3>
+            <p class="muted">A composed sequence of courses featuring seasonal produce, house-made breads, and classic sauces.</p>
+          </article>
+          <article class="card">
+            <h3>Occasions & Private Events</h3>
+            <p class="muted">From anniversaries to small celebrations. Inquire for bespoke menus and room configurations.</p>
+          </article>
+          <article class="card">
+            <h3>Dietary Considerations</h3>
+            <p class="muted">Please note any allergies or preferences when you request a reservation; we will confirm accommodations.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section id="gallery" aria-label="Gallery">
+      <div class="container">
+        <div class="hd">
+          <h2>Gallery</h2>
+          <div class="muted">Scenes from the house and table.</div>
+        </div>
+        <div class="gallery">
+          <!-- TODO: replace placeholders with your images (use descriptive alt text) -->
+          <figure>
+            <img src="parlor.jpg" alt="Candlelit parlor with Victorian woodwork" loading="lazy" />
+            <figcaption>Parlor dining room</figcaption>
+          </figure>
+          <figure>
+            <img src="table-setting.jpg" alt="Place setting with fine china and gold-rimmed stemware" loading="lazy" />
+            <figcaption>Table setting</figcaption>
+          </figure>
+          <figure>
+            <img src="entrance.jpg" alt="Restored 19th-century facade and entry" loading="lazy" />
+            <figcaption>Historic entrance</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRESS / TESTIMONIALS -->
+    <section id="press">
+      <div class="container">
+        <div class="hd">
+          <h2>Press & Kind Words</h2>
+        </div>
+        <div class="press">
+          <blockquote class="quote">
+            “J.C. Wyatt House, a Victorian-style home transformed into a reservation-only restaurant. Its picturesque interior is only rivaled by its delectable, multi-course menu.”
+            <cite>— Kasim J. Hardaway</cite>
+          </blockquote>
+          <blockquote class="quote">
+            “One of the most impressive examples of historic renovation can be found at the J.C. Wyatt House, which goes well beyond one’s anticipated expectations…”
+            <cite>— Kansas City Star</cite>
+          </blockquote>
+          <blockquote class="quote">
+            “The J.C. Wyatt House hits the trifecta of dining… incredible food, impeccable service, and ambience.”
+            <cite>— Missouri Life Magazine</cite>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT / RESERVATIONS -->
+    <section id="contact" aria-label="Reservations">
+      <div class="container">
+        <div class="hd">
+          <h2>Request a Reservation</h2>
+          <div class="muted">24-hour advance notice required. Dinner Thu–Sat, seatings 5:30–7:00 PM.</div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1.1fr .9fr">
+          <form id="resForm" novalidate>
+            <!-- NOTE: This form composes an email locally; swap to your preferred handler if you have one -->
+            <label>
+              Full name
+              <input name="name" autocomplete="name" required />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" autocomplete="email" required />
+            </label>
+            <label>
+              Phone
+              <input type="tel" name="phone" autocomplete="tel" required />
+            </label>
+            <label>
+              Preferred date
+              <input type="date" name="date" required />
+            </label>
+            <label>
+              Time (between 5:30–7:00 PM)
+              <input type="time" name="time" min="17:30" max="19:00" required />
+            </label>
+            <label>
+              Party size
+              <select name="party" required>
+                <option value="" disabled selected>Choose…</option>
+                <option>2</option><option>3</option><option>4</option>
+                <option>5</option><option>6</option><option>7</option><option>8</option>
+              </select>
+            </label>
+            <label>
+              Notes (allergies, occasion)
+              <textarea name="notes" placeholder="Allergies, preferences, or special occasion"></textarea>
+            </label>
+            <div style="display:flex; gap:.6rem; align-items:center; flex-wrap:wrap">
+              <button type="submit" class="reserve-btn">Send Request</button>
+              <span class="small muted">Or call <a id="callLink" href="tel:+1XXXXXXXXXX">+1 (XXX) XXX-XXXX</a></span>
+            </div>
+            <p class="status muted" id="status"></p>
+          </form>
+
+          <aside class="card" aria-label="Location & hours">
+            <strong style="font-family:var(--serif)">Location & Hours</strong>
+            <p style="margin-top:.4rem">
+              <span id="addr">TO DO: Street Address, St. Joseph, MO</span><br/>
+              Dinner Thu–Sat • Seatings 5:30–7:00 PM • Close 9:00 PM
+            </p>
+            <p class="small muted" style="margin:.4rem 0 0">
+              Click for directions:
+              <a id="mapLink" target="_blank" rel="noopener">Open in Maps</a>
+            </p>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
+    <div class="container foot">
+      <div class="small">© <span id="year"></span> J.C. Wyatt House. All rights reserved.</div>
+      <div class="small">Private dining by advance reservation.</div>
+    </div>
+  </footer>
+
+  <!-- Minimal JS: mobile menu, mailto composition, small conveniences -->
+  <script>
+    (function(){
+      const $ = (sel, el=document) => el.querySelector(sel);
+
+      // Mobile menu toggle
+      const menuBtn = $('#menuBtn');
+      const links = $('#navlinks');
+      if(menuBtn && links){
+        menuBtn.addEventListener('click', () => {
+          const open = links.getAttribute('data-open') === 'true';
+          links.setAttribute('data-open', String(!open));
+          menuBtn.setAttribute('aria-expanded', String(!open));
+        });
+      }
+
+      // Footer year
+      const year = new Date().getFullYear();
+      const y = $('#year'); if(y) y.textContent = year;
+
+      // Phone + address (single source of truth) — update these two lines.
+      const PHONE = '+1XXXXXXXXXX';              // TODO: replace with business number e.g., +1816XXXXXXX
+      const ADDRESS = 'TO DO: Street, St. Joseph, MO';  // TODO: replace full address
+
+      // Wire phone link and Maps link
+      const callLink = $('#callLink'); if(callLink) callLink.href = 'tel:' + PHONE;
+      const mapLink = $('#mapLink');
+      const addrSpan = $('#addr');
+      if(addrSpan && addrSpan.textContent.includes('TO DO') === false && mapLink){
+        mapLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addrSpan.textContent);
+      } else if(mapLink) {
+        mapLink.style.display = 'none';
+      }
+
+      // Reservation form -> compose email via mailto:
+      const form = $('#resForm');
+      const status = $('#status');
+      form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const data = Object.fromEntries(fd.entries());
+        // Simple validation
+        const required = ['name','email','phone','date','time','party'];
+        const missing = required.filter(k => !String(data[k]||'').trim());
+        if(missing.length){
+          status.textContent = 'Please complete all required fields.';
+          status.style.color = 'var(--brand)';
+          return;
+        }
+        const subject = `Reservation Request — ${data.date} ${data.time} for ${data.party}`;
+        const body = [
+          `Name: ${data.name}`,
+          `Email: ${data.email}`,
+          `Phone: ${data.phone}`,
+          `Date: ${data.date}`,
+          `Time: ${data.time}`,
+          `Party size: ${data.party}`,
+          `Notes: ${data.notes||'-'}`
+        ].join('%0D%0A');
+
+        // TODO: replace with your reservations email
+        const to = 'mailto:reservations@jcwyatt.net'; 
+        const href = `${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
+        window.location.href = href;
+        status.textContent = 'Opening your email app…';
+        status.style.color = 'inherit';
+        form.reset();
+      });
+
+      // Optional: light/dark auto based on system; change data-theme top-level to "auto" to enable.
+      // document.documentElement.setAttribute('data-theme','auto');
+    })();
+  </script>
+</body>
+</html>
