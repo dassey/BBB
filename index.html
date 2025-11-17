@@ -1,7 +1,455 @@
-<head><meta charset="utf-8"><title>OpenPose 3D – Browser Pose Editor</title><meta name="viewport" content="width=device-width,initial-scale=1"><script src="https://cdn.jsdelivr.net/npm/toastify-js"></script><script src="https://cdn.jsdelivr.net/npm/micromodal/dist/micromodal.min.js"></script><script async="" src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"><script type="importmap">{
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>OpenPose 3D – Browser Pose Editor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<!-- Three.js (pinned) + controls -->
+<!-- Polyfill to support import maps in every modern browser -->
+<script src="https://cdn.jsdelivr.net/npm/micromodal/dist/micromodal.min.js"></script>
+<script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+>
+<!-- Import map: single source of truth for Three.js + addons -->
+<script type="importmap">
+      {
         "imports": {
           "three": "https://unpkg.com/three@0.180.0/build/three.module.min.js",
           "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
         }
-      }</script><link rel="stylesheet" href="styles.css"><script data-goatcounter="https://dtop-editor.goatcounter.com/count" async="" src="//gc.zgo.at/count.js"></script><script type="module" src="./main.js"></script></head><body><div class="app"><div class="topbar"><div class="toolbar"><button id="mode-translate" title="Translate (W)" class="button" data-state="">Translate</button> <button id="mode-rotate" data-state="active" title="Rotate (E)" class="button">Rotate</button><div class="divider"></div><button id="space-local" data-state="active" title="Local space" class="button">Local</button> <button id="space-world" class="button" title="World space" data-state="">World</button><div class="divider"></div><button id="reset-pose" title="Reset pose" class="hidden">Reset</button><div class="divider hidden"></div><button id="symmetry" class="button" title="Mirror lock across the spine">Symmetry</button><div class="divider"></div><button id="cam-persp" data-state="active" title="Perspective camera" class="button">Persp</button> <button id="cam-ortho-front" class="button" title="Orthographic Front lock" data-state="">Ort Front</button> <button id="cam-ortho-side" class="button" title="Orthographic Side lock" data-state="">Ort Side</button><div class="divider"></div><button id="toggle-grid" data-state="active" title="Toggle grid" class="button">Grid</button> <button id="screenshot" title="Save viewport PNG" class="button">Screenshot</button><div class="divider"></div><button id="about" title="About" data-micromodal-trigger="modal-about" class="button">ⓘ</button> <button id="about" title="About &amp; Controls" data-micromodal-trigger="modal-shortcuts" class="button">⌨️</button></div><div class="status" id="status">Selected: Root</div></div><div class="left"><div class="group" id="inspector"><h3>Joint Inspector</h3><p id="inspector-joint" class="pill">Root</p><div class="row"><h4>Rotation (°)</h4><div class="split"><label class="note">X</label><div><span class="chip" id="lim-x">limits: *</span> <input type="number" step="1" id="rot-x" placeholder="Pitch X"></div><label class="note">Y</label><div><span class="chip" id="lim-y">limits: *</span> <input type="number" step="1" id="rot-y" placeholder="Yaw Y"></div><label class="note">Z</label><div><span class="chip" id="lim-z">limits: *</span> <input type="number" step="1" id="rot-z" placeholder="Roll Z"></div></div></div><div class="row"><h4>Transform</h4><div class="split"><label class="note">X</label> <input type="number" step="0.01" id="pos-x" placeholder="X" title=""> <label class="note">Y</label> <input type="number" step="0.01" id="pos-y" placeholder="Y" title=""> <label class="note">Z</label> <input type="number" step="0.01" id="pos-z" placeholder="Z" title=""></div></div></div><div class="group"><h3>Skeleton Hierarchy</h3><div class="tree" id="tree"><ul><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-Root" class="button sel">Root</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-Pelvis" class="button">Pelvis</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-Spine1" class="button">Spine1</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-Spine2" class="button">Spine2</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-Neck" class="button">Neck</button></div><ul class="tree-children"><li class="tree-item tree-no-children"><div class="tree-item-label"><span class="tree-toggle"></span><button id="tree-Head" class="button">Head</button></div></li></ul></li><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-LeftClavicle" class="button">LeftClavicle</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-LeftShoulder" class="button">LeftShoulder</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-LeftElbow" class="button">LeftElbow</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-LeftWrist" class="button">LeftWrist</button></div><ul class="tree-children"><li class="tree-item tree-no-children"><div class="tree-item-label"><span class="tree-toggle"></span><button id="tree-LeftHand" class="button">LeftHand</button></div></li></ul></li></ul></li></ul></li></ul></li><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-RightClavicle" class="button">RightClavicle</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-RightShoulder" class="button">RightShoulder</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-RightElbow" class="button">RightElbow</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-RightWrist" class="button">RightWrist</button></div><ul class="tree-children"><li class="tree-item tree-no-children"><div class="tree-item-label"><span class="tree-toggle"></span><button id="tree-RightHand" class="button">RightHand</button></div></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-LeftHip" class="button">LeftHip</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-LeftKnee" class="button">LeftKnee</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-LeftAnkle" class="button">LeftAnkle</button></div><ul class="tree-children"><li class="tree-item tree-no-children"><div class="tree-item-label"><span class="tree-toggle"></span><button id="tree-LeftFoot" class="button">LeftFoot</button></div></li></ul></li></ul></li></ul></li><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-RightHip" class="button">RightHip</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-RightKnee" class="button">RightKnee</button></div><ul class="tree-children"><li class="tree-item"><div class="tree-item-label"><span class="tree-toggle">▼</span><button id="tree-RightAnkle" class="button">RightAnkle</button></div><ul class="tree-children"><li class="tree-item tree-no-children"><div class="tree-item-label"><span class="tree-toggle"></span><button id="tree-RightFoot" class="button">RightFoot</button></div></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></div></div></div><div class="center"><div class="overlay"><img id="ref-img" class="hidden" alt="reference"></div><div id="viewport" class="viewport"><canvas data-engine="three.js r180" width="840" height="1322" style="display: block; width: 420px; height: 661px; touch-action: none;"></canvas></div></div><div class="right"><div class="right-top"><h3>Pose Library</h3><div class="row"><input id="pose-name" placeholder="Pose name (e.g., T-Pose)"> <button id="save-pose" class="button">Save Pose</button></div><div class="thumbs" id="thumbs"></div><div class="col"><button id="export-library" class="button">Export Library</button> <label for="import-library" class="button">Import Library</label></div><input class="hidden" id="import-library" type="file" accept="application/json"><div class="row"><span class="note small">Note: The pose library is also saved locally in localStorage</span></div></div><div class="right-bottom"><div class="group"><h3>OpenPose Export (Draw Things)</h3><div><label class="checkbox-label">Normalize:</label> <input id="openpose-normalize" type="checkbox" checked=""></div><div class="col"><button id="export-openpose" class="button">Export to JSON file</button> <button id="copy-openpose" class="button">Copy to Clipboard</button></div></div><div class="group"><h3>Reference Image Overlay</h3><div class="row"><input id="ref-file" type="file" accept="image/*"></div><div class="row"><h4>Opacity</h4><input id="ref-opacity" type="range" min="0" max="1" step="0.01" value="0.5"></div><div class="row"><h4>Scale</h4><input id="ref-scale" type="range" min="0.1" max="3" step="0.01" value="1.0"></div><div class="row"><h4>Offset X</h4><input id="ref-ox" type="range" min="-500" max="500" step="1" value="0"></div><div class="row"><h4>Offset Y</h4><input id="ref-oy" type="range" min="-500" max="500" step="1" value="0"></div></div><div class="group"><h3>Inverse Kinematics (alpha)</h3><div class="row"><h4>Left Arm</h4><select id="ik-left-arm"><option value="FK">FK</option><option value="IK">IK</option></select></div><div class="row"><h4>Right Arm</h4><select id="ik-right-arm"><option value="FK">FK</option><option value="IK">IK</option></select></div><div class="row"><h4>Left Leg</h4><select id="ik-left-leg"><option value="FK">FK</option><option value="IK">IK</option></select></div><div class="row"><h4>Right Leg</h4><select id="ik-right-leg"><option value="FK">FK</option><option value="IK">IK</option></select></div></div></div></div></div><div class="modal" id="modal-about" aria-hidden="true"><div class="modal__overlay" tabindex="-1"><div class="modal__aboutcontainer" role="dialog" aria-modal="true" aria-labelledby="modal-about-title"><button class="modal__close button" aria-label="Close modal" data-micromodal-close="">X</button><h2 class="modal__title" id="modal-about-title">DTOP Editor</h2><span class="modal__subtitle">Draw Things OpenPose Editor</span><p><a href="https://github.com/inform880/dtop-editor" target="_blank">Github Repository</a></p><p>Created using <a href="https://threejs.org/" target="_blank">Three.js</a> , <a href="https://micromodal.now.sh/" target="_blank">MicroModal.js</a> , and <a href="https://apvarun.github.io/toastify-js/" target="_blank">Toastify.js</a></p><p>© 2025 <a href="https://github.com/inform880" target="_blank">inform880</a></p></div></div></div><div class="modal" id="modal-shortcuts" aria-hidden="true"><div class="modal__overlay" tabindex="-1"><div class="shortcuts-panel" role="dialog" aria-modal="true" aria-labelledby="modal-shortcuts-title"><button class="modal__close button" aria-label="Close modal" data-micromodal-close="">X</button><table class="shortcuts-table"><tbody><tr><th>Shortcut</th><th>Action</th></tr><tr><td><code class="shortcut-key">W</code></td><td>Enable translate tool</td></tr><tr><td><code class="shortcut-key">E</code></td><td>Enable rotate tool</td></tr><tr><td><code class="shortcut-key">F</code></td><td>Frame selected joint</td></tr><tr><td><code class="shortcut-key">G</code></td><td>Toggle grid</td></tr><tr><td><code class="shortcut-key">Ctrl/Cmd + S</code></td><td>Save pose to library</td></tr><tr><td><code class="shortcut-key">Ctrl/Cmd + C</code></td><td>Copy OpenPose to clipboard</td></tr></tbody></table></div></div></div>
+      }
+</script>
+<link rel="stylesheet" href="styles.css"/>
+<script
+  data-goatcounter="https://dtop-editor.goatcounter.com/count"
+  async
+  src="//gc.zgo.at/count.js"
+></script>
+<script type="module" src="./main.js"></script>
+</head>
+<body>
+<div class="app">
+  <!-- Top toolbar -->
+  <div class="topbar">
+    <div class="toolbar">
+      <button
+        id="mode-translate"
+        title="Translate (W)"
+        class="button"
+      >Translate</button>
+      <button
+        id="mode-rotate"
+        data-state="active"
+        title="Rotate (E)"
+        class="button"
+      >
+        Rotate
+      </button>
+      <div class="divider"></div>
+      <button
+        id="space-local"
+        data-state="active"
+        title="Local space"
+        class="button"
+      >
+        Local
+      </button>
+      <button
+        id="space-world"
+        class="button"
+        title="World space"
+      >World</button>
+      <div class="divider"></div>
+      <button
+        id="reset-pose"
+        title="Reset pose"
+        class="hidden"
+      >
+        Reset
+      </button>
+      <div class="divider hidden"></div>
+      <button
+        id="symmetry"
+        class="button"
+        title="Mirror lock across the spine"
+      >Symmetry</button>
+      <div class="divider"></div>
+      <button
+        id="cam-persp"
+        data-state="active"
+        title="Perspective camera"
+        class="button"
+      >
+        Persp
+      </button>
+      <button
+        id="cam-ortho-front"
+        class="button"
+        title="Orthographic Front lock"
+      >
+        Ort Front
+      </button>
+      <button
+        id="cam-ortho-side"
+        class="button"
+        title="Orthographic Side lock"
+      >
+        Ort Side
+      </button>
+      <div class="divider"></div>
+      <button
+        id="toggle-grid"
+        data-state="active"
+        title="Toggle grid"
+        class="button"
+      >
+        Grid
+      </button>
+      <button
+        id="screenshot"
+        title="Save viewport PNG"
+        class="button"
+      >Screenshot</button>
+      <div class="divider"></div>
+      <button
+        id="about"
+        title="About"
+        data-micromodal-trigger="modal-about"
+        class="button"
+      >
+        ⓘ
+      </button>
+      <button
+        id="about"
+        title="About & Controls"
+        data-micromodal-trigger="modal-shortcuts"
+        class="button"
+      >
+        ⌨️
+      </button>
+    </div>
+    <div class="status" id="status">Ready.</div>
+  </div>
+  <!-- Left: hierarchy + inspector -->
+  <div class="left">
+    <div class="group" id="inspector">
+      <h3>
+        Joint Inspector
+      </h3>
+      <p id="inspector-joint" class="pill">-</p>
+      <div class="row">
+        <h4>Rotation (°)</h4>
+        <div class="split">
+          <label class="note">X</label>
+          <div>
+            <span class="chip" id="lim-x">limits: *</span>
+            <input
+              type="number"
+              step="1"
+              id="rot-x"
+              placeholder="Pitch X"
+            />
+          </div>
+          <label class="note">Y</label>
+          <div>
+            <span class="chip" id="lim-y">limits: *</span>
+            <input
+              type="number"
+              step="1"
+              id="rot-y"
+              placeholder="Yaw Y"
+            />
+          </div>
+          <label class="note">Z</label>
+          <div>
+            <span class="chip" id="lim-z">limits: *</span>
+            <input
+              type="number"
+              step="1"
+              id="rot-z"
+              placeholder="Roll Z"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <h4>Transform</h4>
+        <div class="split">
+          <label class="note">X</label>
+          <input
+            type="number"
+            step="0.01"
+            id="pos-x"
+            placeholder="X"
+          />
+          <label class="note">Y</label>
+          <input
+            type="number"
+            step="0.01"
+            id="pos-y"
+            placeholder="Y"
+          />
+          <label class="note">Z</label>
+          <input
+            type="number"
+            step="0.01"
+            id="pos-z"
+            placeholder="Z"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="group">
+      <h3>Skeleton Hierarchy</h3>
+      <div class="tree" id="tree"></div>
+    </div>
+  </div>
+  <!-- Center: 3D viewport + overlay -->
+  <div class="center">
+    <div class="overlay">
+      <img
+        id="ref-img"
+        class="hidden"
+        alt="reference"
+      />
+    </div>
+    <div id="viewport" class="viewport"></div>
+  </div>
+  <!-- Right: library, IK, reference overlay, IO -->
+  <div class="right">
+    <div class="right-top">
+      <h3>Pose Library</h3>
+      <div class="row">
+        <input
+          id="pose-name"
+          type="text"
+          placeholder="Pose name (e.g., T-Pose)"
+        />
+        <button id="save-pose" class="button">Save Pose</button>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+      <div class="col">
+        <button id="export-library" class="button">Export Library</button>
+        <label for="import-library" class="button">Import Library</label>
+      </div>
+      <input
+        class="hidden"
+        id="import-library"
+        type="file"
+        accept="application/json"
+      />
+      <div class="row">
+        <span class="note small">Note: The pose library is also saved locally in localStorage</span>
+      </div>
+    </div>
+    <div class="right-bottom">
+      <div class="group">
+        <h3>OpenPose Export (Draw Things)</h3>
+        <div>
+          <label class="checkbox-label">Normalize:</label>
+          <input
+            id="openpose-normalize"
+            type="checkbox"
+            checked
+          />
+        </div>
+        <div class="col">
+          <button id="export-openpose" class="button">Export to JSON file</button>
+          <button id="copy-openpose" class="button">Copy to Clipboard</button>
+        </div>
+      </div>
+      <div class="group">
+        <h3>Reference Image Overlay</h3>
+        <div class="row">
+          <input
+            id="ref-file"
+            type="file"
+            accept="image/*"
+          />
+        </div>
+        <div class="row">
+          <h4>Opacity</h4>
+          <input
+            id="ref-opacity"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.5"
+          />
+        </div>
+        <div class="row">
+          <h4>Scale</h4>
+          <input
+            id="ref-scale"
+            type="range"
+            min="0.1"
+            max="3"
+            step="0.01"
+            value="1.0"
+          />
+        </div>
+        <div class="row">
+          <h4>Offset X</h4>
+          <input
+            id="ref-ox"
+            type="range"
+            min="-500"
+            max="500"
+            step="1"
+            value="0"
+          />
+        </div>
+        <div class="row">
+          <h4>Offset Y</h4>
+          <input
+            id="ref-oy"
+            type="range"
+            min="-500"
+            max="500"
+            step="1"
+            value="0"
+          />
+        </div>
+      </div>
+      <div class="group">
+        <h3>Inverse Kinematics (alpha)</h3>
+        <div class="row">
+          <h4>Left Arm</h4>
+          <select id="ik-left-arm">
+            <option value="FK">FK</option>
+            <option value="IK">IK</option>
+          </select>
+        </div>
+        <div class="row">
+          <h4>Right Arm</h4>
+          <select id="ik-right-arm">
+            <option value="FK">FK</option>
+            <option value="IK">IK</option>
+          </select>
+        </div>
+        <div class="row">
+          <h4>Left Leg</h4>
+          <select id="ik-left-leg">
+            <option value="FK">FK</option>
+            <option value="IK">IK</option>
+          </select>
+        </div>
+        <div class="row">
+          <h4>Right Leg</h4>
+          <select id="ik-right-leg">
+            <option value="FK">FK</option>
+            <option value="IK">IK</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal"
+  id="modal-about"
+  aria-hidden="true"
+>
+  <div class="modal__overlay" tabindex="-1">
+    <div
+      class="modal__aboutcontainer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-about-title"
+    >
+      <button
+        class="modal__close button"
+        aria-label="Close modal"
+        data-micromodal-close
+      >
+        X
+      </button>
+      <h2 class="modal__title" id="modal-about-title">DTOP Editor</h2>
+      <span class="modal__subtitle">Draw Things OpenPose Editor</span>
+      <p>
+        <a href="https://github.com/inform880/dtop-editor" target="_blank">Github Repository</a>
+      </p>
+      <p>
+        Created using
+        <a href="https://threejs.org/" target="_blank">Three.js</a>
+        ,
+        <a href="https://micromodal.now.sh/" target="_blank">MicroModal.js</a>
+        , and
+        <a href="https://apvarun.github.io/toastify-js/" target="_blank">Toastify.js</a>
+      </p>
+      <p>
+        &copy; 2025
+        <a href="https://github.com/inform880" target="_blank">inform880</a>
+      </p>
+    </div>
+  </div>
+</div>
+<div
+  class="modal"
+  id="modal-shortcuts"
+  aria-hidden="true"
+>
+  <div class="modal__overlay" tabindex="-1">
+    <div
+      class="shortcuts-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-shortcuts-title"
+    >
+      <button
+        class="modal__close button"
+        aria-label="Close modal"
+        data-micromodal-close
+      >X</button>
+      <table class="shortcuts-table">
+        <tr>
+          <th>Shortcut</th>
+          <th>Action</th>
+        </tr>
+        <tr>
+          <td>
+            <code class="shortcut-key">W</code>
+          </td>
+          <td>Enable translate tool</td>
+        </tr>
+        <tr>
+          <td>
+            <code class="shortcut-key">E</code>
+          </td>
+          <td>Enable rotate tool</td>
+        </tr>
+        <tr>
+          <td>
+            <code class="shortcut-key">F</code>
+          </td>
+          <td>Frame selected joint</td>
+        </tr>
+        <tr>
+          <td>
+            <code class="shortcut-key">G</code>
+          </td>
+          <td>Toggle grid</td>
+        </tr>
+        <tr>
+          <td>
+            <code class="shortcut-key">Ctrl/Cmd + S</code>
+          </td>
+          <td>Save pose to library</td>
+        </tr>
+        <tr>
+          <td>
+            <code class="shortcut-key">Ctrl/Cmd + C</code>
+          </td>
+          <td>Copy OpenPose to clipboard</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
 </body>
+</html>
