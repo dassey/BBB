@@ -1,50 +1,65 @@
 # Northland Driving
 
-A single-file website for **Northland Driving** — patient, one-on-one, beginner
-driving lessons for adult women in Gladstone & the Kansas City Northland.
-Women teaching women. No judgment, no rush. First lesson $30.
+Website for **Northland Driving** — calm, patient one-on-one driving lessons for
+adults in Gladstone & the Kansas City Northland. Woman-owned. Lessons in English
+or Tagalog.
 
-Everything lives in **`index.html`** — HTML, CSS, and JavaScript in one file, no
-build step. Trilingual (English / Spanish / Tagalog) with a one-tap toggle.
+Static multi-page site, no build step. Trilingual (English / Spanish / Tagalog)
+via a toggle in the header.
+
+## Files
+
+| File | What it is |
+|------|-----------|
+| `index.html` | Home |
+| `about.html` | About / the instructor |
+| `pricing.html` | Pricing + payment FAQ |
+| `permit.html` | Missouri permit help |
+| `contact.html` | Book a lesson (opens a pre-filled email) |
+| `styles.css` | Shared design system |
+| `app.js` | Shared behaviour: nav, language toggle, FAQ, booking email |
 
 ## Run it
 
-Just open `index.html` in a browser. That's it.
+Open `index.html` in a browser.
 
 ## Host it (free)
 
-Pick any one:
-
+- **GitHub Pages** — repo → Settings → Pages → Build from branch → `main` / root
 - **Netlify** — drag the folder onto https://app.netlify.com/drop
-- **Vercel** — `vercel` in this folder, or connect the repo at vercel.com
-- **GitHub Pages** — repo → Settings → Pages → deploy from branch → `/ (root)`
+- **Vercel** — connect the repo
 
-Then point a domain at it. First-choice domains to check on a registrar:
-`northlanddriving.com`, `drivenorthland.com`, `northlanddrivinglessons.com`.
+Then point **northlanddriving.com** at it (each host has a "custom domain" step).
 
 ## ✅ Fill these in before launch
 
-Search `index.html` for `TODO`, `[`, and `000-0000`:
+1. **Contact email** — set `window.ND_EMAIL` at the top of `app.js`. It's currently
+   `hello@northlanddriving.com`. The site has no phone number by design; the
+   Contact form and every "email us" link use this address.
+2. **Instructor name** — the site reads "she / your instructor" throughout, so it's
+   launch-safe. Add her name on `about.html` whenever you like.
+3. **Payment methods** — one FAQ line on `pricing.html` (key `pricing.a1`, and its
+   `es`/`tl` versions in `app.js`). Trim to what she actually accepts.
+4. **Permit facts** — verified against the Missouri DOR in July 2026. Laws change;
+   the page shows a "confirm at the official links" note. Re-check before big shares.
 
-1. **Phone number** — in the `<script>`, set `BUSINESS_NUMBER` (digits only,
-   e.g. `18165551234`) and `BUSINESS_DISPLAY` (e.g. `(816) 555-1234`).
-   Also update the two visible "(816) 000-0000" strings (Book + Footer, and
-   their `es`/`tl` translations) and the `telephone` in the JSON-LD block.
-2. **Instructor name** — the site currently reads "your instructor" throughout,
-   so it's launch-safe as is. Add her real name to the Instructor section and
-   the review credit lines whenever you'd like.
-3. **Payment methods** — FAQ answer `faq.a5` (and its `es`/`tl` versions) lists
-   cash / Venmo / Cash App / Zelle. Trim to what she actually accepts.
-4. **Reviews** — the three testimonials are clearly marked "Sample". Replace
-   with real ones, or delete the whole `#reviews` section.
-5. **Instructor photo** — drop a photo into the portrait placeholder in the
-   Instructor section (replace the `.portrait` placeholder markup with an
-   `<img>`).
+## 🖼️ Graphics to add (optional, but they'll lift it further)
 
-## Missouri permit facts
+The site ships with clean built-in SVG graphics (the route-map hero, icons, the
+brand mark), so nothing is *missing*. If you want to add real imagery, these are
+the highest-impact slots. Drop files into an `images/` folder and swap them in
+where noted.
 
-The **Permit Help** section was verified against the Missouri Department of
-Revenue in July 2026 (permit cost $10, valid 12 months, min age 15, accompaniment
-rules, GDL steps). Laws change — the section carries a visible "confirm at the
-official DOR links" notice, and all source links are included. Re-check before
-each big share.
+1. **Instructor photo** — `about.html`, the dark portrait frame.
+   Portrait orientation (4:5), ~1000×1250px, warm and friendly. This is the single
+   most valuable image on the site — a real face builds trust fast.
+   Swap: replace the `<div class="ph">…</div>` block with `<img src="images/instructor.jpg" alt="Your instructor">`.
+2. **Social share image** — 1200×630px, for when the link is posted on Nextdoor /
+   Facebook (the preview card). Simple: logo + "Learn to drive at your own pace" on
+   the concrete background. Save as `images/og.jpg` and I can wire up the meta tags.
+3. **A lesson / car photo (optional)** — one calm, real photo (the car, a lesson in
+   progress) can sit on the Home page between sections. 16:9, ~1600px wide.
+4. **Logo mark (optional)** — the built-in road emblem works, but if you get a real
+   logo, send the SVG and I'll place it in the header, footer, and favicon.
+
+Send me any of these and I'll drop them in.
