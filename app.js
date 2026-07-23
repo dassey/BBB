@@ -14,7 +14,8 @@ window.ND_EMAIL = "hello@northlanddriving.com";
 window.ND_DICT = {
   es:{
     "nav.about":"Nosotras","nav.pricing":"Precios","nav.permit":"Permiso","nav.contact":"Contacto","nav.book":"Reservar clase",
-    "cta.book":"Reservar una clase","cta.pricing":"Ver precios","cta.contact":"Contáctanos","cta.learn":"Cómo funciona","cta.permit":"Guía del permiso",
+    "cta.book":"Reservar una clase","cta.pricing":"Ver precios","cta.contact":"Contáctanos","cta.learn":"Cómo funciona","cta.permit":"Guía del permiso","cta.quiz":"Hacer el quiz de estudio",
+    "quiz.title":"Quiz de estudio del permiso · Northland Driving","quiz.eyebrow":"Quiz de estudio del permiso","quiz.h1":"Ponte a prueba.","quiz.intro":"Diez preguntas cada vez, elegidas al azar de un banco de treinta. Verás la respuesta y una breve explicación sobre la marcha.","quiz.note":"Solo práctica — este no es el examen oficial. Las preguntas están en inglés, como el examen del estado. Estudia también la Guía del Conductor de Missouri.",
 
     /* footer + common */
     "foot.tag":"Clases de manejo con calma y paciencia para mujeres adultas en Gladstone y el Northland de Kansas City.",
@@ -86,7 +87,7 @@ window.ND_DICT = {
     "permit.f4.t":"Menores de 18 (pasos GDL)","permit.f4a":"Mantener el permiso 182 días y registrar 40 horas supervisadas, incluidas 10 de noche.","permit.f4b":"Luego una Licencia Intermedia ($5, válida 2 años).","permit.f4c":"Toque de queda de 1 a 5 a.m. y límites de pasajeros.",
     "permit.links.h":"Enlaces oficiales",
     "permit.l1":"Costo y vigencia del permiso (DOR)","permit.l2":"Licencia Graduada (DOR)","permit.l3":"Preguntas frecuentes GDL (DOR)","permit.l4":"Lista de documentos (DOR)","permit.l5":"Guía del Conductor (PDF)","permit.l6":"Estaciones de examen (MSHP)",
-    "permit.band.h2":"¿Estudiando para el examen escrito?","permit.band.p":"Te indicamos exámenes de práctica gratuitos y te ayudamos a prepararte para las clases.",
+    "permit.band.h2":"¿Estudiando para el examen escrito?","permit.band.p":"Prueba nuestro quiz de práctica gratis — 10 preguntas cada vez, de un banco de 30.",
 
     /* CONTACT */
     "contact.title":"Contacto · Northland Driving",
@@ -99,7 +100,8 @@ window.ND_DICT = {
 
   tl:{
     "nav.about":"Tungkol","nav.pricing":"Presyo","nav.permit":"Permit","nav.contact":"Kontak","nav.book":"Mag-book ng lesson",
-    "cta.book":"Mag-book ng lesson","cta.pricing":"Tingnan ang presyo","cta.contact":"Kontakin kami","cta.learn":"Paano ito","cta.permit":"Gabay sa permit",
+    "cta.book":"Mag-book ng lesson","cta.pricing":"Tingnan ang presyo","cta.contact":"Kontakin kami","cta.learn":"Paano ito","cta.permit":"Gabay sa permit","cta.quiz":"Subukan ang study quiz",
+    "quiz.title":"Study quiz sa permit · Northland Driving","quiz.eyebrow":"Study quiz sa permit","quiz.h1":"Subukan ang sarili mo.","quiz.intro":"Sampung tanong kada beses, random na kinukuha mula sa bank ng tatlumpu. Makikita mo ang sagot at maikling paliwanag habang naglalaro.","quiz.note":"Praktis lang — hindi ito ang opisyal na test. Nasa English ang mga tanong, tulad ng state exam. Pag-aralan din ang opisyal na Missouri Driver Guide.",
 
     "foot.tag":"Kalmado at mapagpasensyang driving lessons para sa mga adult na babae sa Gladstone at KC Northland.",
     "foot.explore":"Tuklasin","foot.lessons":"Ang lessons","foot.contact":"Kontak",
@@ -166,7 +168,7 @@ window.ND_DICT = {
     "permit.f4.t":"Wala pang 18 (GDL steps)","permit.f4a":"Hawakan ang permit ng 182 araw at mag-log ng 40 oras na supervised, kasama ang 10 oras sa gabi.","permit.f4b":"Tapos Intermediate License ($5, valid 2 taon).","permit.f4c":"Curfew na 1 hanggang 5 a.m. at limitasyon sa pasahero.",
     "permit.links.h":"Mga opisyal na link",
     "permit.l1":"Presyo at bisa ng permit (DOR)","permit.l2":"Graduated Driver License (DOR)","permit.l3":"GDL FAQ (DOR)","permit.l4":"Listahan ng dokumento (DOR)","permit.l5":"Driver Guide (PDF)","permit.l6":"Test stations (MSHP)",
-    "permit.band.h2":"Nag-aaral para sa written test?","permit.band.p":"Maituturo namin ang libreng practice tests at tutulungan kang maging handa sa lesson.",
+    "permit.band.h2":"Nag-aaral para sa written test?","permit.band.p":"Subukan ang aming libreng practice quiz — 10 tanong kada beses, mula sa bank ng 30.",
 
     "contact.title":"Kontak · Northland Driving",
     "contact.eyebrow":"Kontak","contact.h1":"Mag-book ng lesson.","contact.lead":"Ilagay ang pangalan at email mo at magbubukas kami ng mensaheng handa nang i-send. Pwede ka ring mag-email nang diretso anumang oras.",
