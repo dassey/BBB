@@ -17,7 +17,7 @@ window.ND_DICT = {
     "cta.book":"Reservar una clase","cta.pricing":"Ver precios","cta.contact":"Contáctanos","cta.learn":"Cómo funciona","cta.permit":"Guía del permiso",
 
     /* footer + common */
-    "foot.tag":"Clases de manejo con calma y paciencia para adultos en Gladstone y el Northland de Kansas City.",
+    "foot.tag":"Clases de manejo con calma y paciencia para mujeres adultas en Gladstone y el Northland de Kansas City.",
     "foot.explore":"Explorar","foot.lessons":"Las clases","foot.contact":"Contacto",
     "foot.area":"Servimos a Gladstone y el Northland de KC, Missouri.",
     "foot.owned":"Negocio local, propiedad de una mujer · Gladstone, MO",
@@ -62,12 +62,13 @@ window.ND_DICT = {
     "pricing.t1.name":"Primera clase","pricing.t1.sub":"Una hora · solo para primerizas, una por persona","pricing.t1.f1":"Un primer intento sin presión","pricing.t1.f2":"Descubre si manejar es para ti","pricing.t1.f3":"Nuestro auto, lote vacío","pricing.t1.btn":"Empezar aquí",
     "pricing.t2.flag":"Mejor valor","pricing.t2.name":"Paquete de 6 horas","pricing.t2.sub":"Unas seis clases · aproximadamente $41.67 por hora","pricing.t2.f1":"Ahorras $20 frente al precio por clase","pricing.t2.f2":"Tiempo suficiente para dominarlo","pricing.t2.f3":"Del lote hasta las calles","pricing.t2.btn":"Elegir paquete",
     "pricing.t3.name":"Por clase","pricing.t3.sub":"Paga sobre la marcha, una hora a la vez","pricing.t3.f1":"Sin compromiso","pricing.t3.f2":"Reserva cuando te convenga","pricing.t3.f3":"La misma atención individual","pricing.t3.btn":"Reservar una clase",
-    "pricing.inc.h":"Incluido en cada clase","pricing.inc1":"Nuestro auto","pricing.inc1p":"Practicas en nuestro vehículo. No traes nada.","pricing.inc2":"Horario flexible","pricing.inc2p":"Reservamos a la hora que te convenga.","pricing.inc3":"Uno a uno","pricing.inc3p":"Toda la hora es tuya, a tu ritmo.",
+    "pricing.inc.h":"Incluido en cada clase","pricing.inc1":"Nuestro auto","pricing.inc1p":"Practicas en nuestro vehículo. No traes nada.","pricing.inc2":"Horario flexible","pricing.inc2p":"Reservamos a la hora que te convenga.","pricing.inc3":"Uno a uno","pricing.inc3p":"Toda la hora es tuya, a tu ritmo.","pricing.inc4":"Recogida local gratis","pricing.inc4p":"Te recogemos sin costo si estás a menos de 5 millas de Gladstone.",
     "pricing.faq.h2":"Preguntas sobre pago",
     "pricing.q1":"¿Cómo pago?","pricing.a1":"Aceptamos efectivo, Venmo, Cash App y Zelle. [Confirma los métodos que aceptas antes de publicar.]",
     "pricing.q2":"¿Cuándo pago?","pricing.a2":"Por clase, pagas al final de la sesión. Los paquetes se pagan por adelantado y luego programamos las horas cuando te convenga.",
     "pricing.q3":"¿Puedo empezar con la clase de prueba?","pricing.a3":"Sí. La clase de prueba de $30 es la mejor manera de empezar. Es de una hora, solo para primerizas, una por persona.",
     "pricing.q4":"¿Necesito un permiso primero?","pricing.a4":"No para practicar en un estacionamiento privado. Necesitarás un permiso de instrucción de Missouri antes de manejar en calles públicas. Consulta la Guía del permiso.",
+    "pricing.q5":"¿Pueden recogerme?","pricing.a5":"Sí. Si estás a menos de 5 millas de Gladstone, te recogemos y te llevamos de regreso sin costo adicional. ¿Un poco más lejos? Pregúntanos y vemos qué podemos hacer.",
 
     /* PERMIT */
     "permit.title":"Guía del permiso de Missouri · Northland Driving",
@@ -93,14 +94,14 @@ window.ND_DICT = {
     "contact.f.name":"Tu nombre","contact.f.namePh":"Nombre","contact.f.email":"Tu correo","contact.f.emailPh":"tucorreo@ejemplo.com","contact.f.opt":"Qué te interesa","contact.f.note":"Mensaje (opcional)","contact.f.notePh":"Cuéntanos un poco sobre tu experiencia manejando.",
     "contact.opt1":"Clase de prueba de $30","contact.opt2":"Clase por hora ($45)","contact.opt3":"Paquete de 6 horas ($250)","contact.opt4":"Solo tengo una pregunta",
     "contact.send":"Abrir correo","contact.fine":"Abre tu app de correo con un mensaje listo para enviar. Nunca enviamos spam.",
-    "contact.reach.h":"Otras formas de contacto","contact.reach.email":"Escríbenos por correo","contact.reach.area":"Área de servicio","contact.reach.areaVal":"Gladstone y el Northland de Kansas City","contact.reach.hours":"Horario","contact.reach.hoursVal":"Flexible, según tu agenda"
+    "contact.reach.h":"Otras formas de contacto","contact.reach.email":"Escríbenos por correo","contact.reach.area":"Área de servicio","contact.reach.areaVal":"Gladstone y el Northland de Kansas City","contact.reach.pickup":"Recogida","contact.reach.pickupVal":"Gratis a menos de 5 millas de Gladstone","contact.reach.hours":"Horario","contact.reach.hoursVal":"Flexible, según tu agenda"
   },
 
   tl:{
     "nav.about":"Tungkol","nav.pricing":"Presyo","nav.permit":"Permit","nav.contact":"Kontak","nav.book":"Mag-book ng lesson",
     "cta.book":"Mag-book ng lesson","cta.pricing":"Tingnan ang presyo","cta.contact":"Kontakin kami","cta.learn":"Paano ito","cta.permit":"Gabay sa permit",
 
-    "foot.tag":"Kalmado at mapagpasensyang driving lessons para sa mga adult sa Gladstone at KC Northland.",
+    "foot.tag":"Kalmado at mapagpasensyang driving lessons para sa mga adult na babae sa Gladstone at KC Northland.",
     "foot.explore":"Tuklasin","foot.lessons":"Ang lessons","foot.contact":"Kontak",
     "foot.area":"Naglilingkod sa Gladstone at KC Northland, Missouri.",
     "foot.owned":"Lokal na negosyo, pag-aari ng babae · Gladstone, MO",
@@ -142,12 +143,13 @@ window.ND_DICT = {
     "pricing.t1.name":"Unang lesson","pricing.t1.sub":"Isang oras · para sa first-timer lang, isa kada tao","pricing.t1.f1":"Walang-pressure na unang subok","pricing.t1.f2":"Tingnan kung bagay sa'yo ang mag-drive","pricing.t1.f3":"Aming kotse, bakanteng lote","pricing.t1.btn":"Dito magsimula",
     "pricing.t2.flag":"Pinakasulit","pricing.t2.name":"6-oras na package","pricing.t2.sub":"Mga anim na lesson · humigit-kumulang $41.67 kada oras","pricing.t2.f1":"Makatipid ng $20 kumpara sa per-lesson","pricing.t2.f2":"Sapat na oras para talagang matutunan","pricing.t2.f3":"Mula lote hanggang kalye","pricing.t2.btn":"Kunin ang package",
     "pricing.t3.name":"Kada lesson","pricing.t3.sub":"Bayad habang tumatakbo, isang oras kada beses","pricing.t3.f1":"Walang commitment","pricing.t3.f2":"Mag-book kung kailan bagay sa'yo","pricing.t3.f3":"Parehong one-on-one na atensyon","pricing.t3.btn":"Mag-book ng lesson",
-    "pricing.inc.h":"Kasama sa bawat lesson","pricing.inc1":"Aming kotse","pricing.inc1p":"Sa aming sasakyan magpa-praktis. Wala kang dadalhin.","pricing.inc2":"Flexible na oras","pricing.inc2p":"Mag-book sa oras na bagay sa'yo.","pricing.inc3":"One-on-one","pricing.inc3p":"Buong oras ay sa'yo, sa bilis mo.",
+    "pricing.inc.h":"Kasama sa bawat lesson","pricing.inc1":"Aming kotse","pricing.inc1p":"Sa aming sasakyan magpa-praktis. Wala kang dadalhin.","pricing.inc2":"Flexible na oras","pricing.inc2p":"Mag-book sa oras na bagay sa'yo.","pricing.inc3":"One-on-one","pricing.inc3p":"Buong oras ay sa'yo, sa bilis mo.","pricing.inc4":"Libreng sundo","pricing.inc4p":"Susunduin ka namin nang walang bayad kung nasa loob ng 5 milya ng Gladstone.",
     "pricing.faq.h2":"Mga tanong sa bayad",
     "pricing.q1":"Paano magbayad?","pricing.a1":"Tumatanggap kami ng cash, Venmo, Cash App, at Zelle. [Kumpirmahin ang tinatanggap na paraan ng bayad bago i-publish.]",
     "pricing.q2":"Kailan magbabayad?","pricing.a2":"Kada lesson, magbabayad sa dulo ng session. Ang package ay bayad muna, tapos ische-schedule ang oras kung kailan bagay sa'yo.",
     "pricing.q3":"Pwede bang magsimula sa trial lesson?","pricing.a3":"Oo. Ang $30 na trial lesson ang pinakamagandang simula. Isang oras, para sa first-timer lang, isa kada tao.",
     "pricing.q4":"Kailangan ko ba muna ng permit?","pricing.a4":"Hindi para sa praktis sa pribadong parking lot. Kakailanganin mo ng Missouri instruction permit bago mag-drive sa pampublikong kalye. Tingnan ang Gabay sa permit.",
+    "pricing.q5":"Pwede ba ninyo akong sunduin?","pricing.a5":"Oo. Kung nasa loob ka ng 5 milya ng Gladstone, susunduin ka namin at ihahatid pabalik nang walang dagdag na bayad. Medyo mas malayo? Magtanong ka lang at titingnan namin.",
 
     "permit.title":"Gabay sa Missouri permit · Northland Driving",
     "permit.eyebrow":"Gabay sa Missouri permit","permit.h1":"Paano kunin ang iyong Missouri permit.","permit.lead":"Bago mag-praktis sa pampublikong kalsada, kailangan ng Missouri ang instruction permit. Eto ang proseso, at tutulungan ka naming mag-aral para sa test.",
@@ -171,7 +173,7 @@ window.ND_DICT = {
     "contact.f.name":"Pangalan mo","contact.f.namePh":"First name","contact.f.email":"Email mo","contact.f.emailPh":"email@halimbawa.com","contact.f.opt":"Ano ang gusto mo","contact.f.note":"Mensahe (opsyonal)","contact.f.notePh":"Sabihin mo kaunti tungkol sa karanasan mo sa pag-drive.",
     "contact.opt1":"$30 na trial lesson","contact.opt2":"Per-hour lesson ($45)","contact.opt3":"6-oras na package ($250)","contact.opt4":"May tanong lang ako",
     "contact.send":"Buksan ang email","contact.fine":"Bubuksan nito ang email app mo na may handang mensahe. Walang spam kailanman.",
-    "contact.reach.h":"Iba pang paraan","contact.reach.email":"Mag-email sa amin","contact.reach.area":"Serbisyong lugar","contact.reach.areaVal":"Gladstone at KC Northland","contact.reach.hours":"Oras","contact.reach.hoursVal":"Flexible, ayon sa schedule mo"
+    "contact.reach.h":"Iba pang paraan","contact.reach.email":"Mag-email sa amin","contact.reach.area":"Serbisyong lugar","contact.reach.areaVal":"Gladstone at KC Northland","contact.reach.pickup":"Sundo","contact.reach.pickupVal":"Libre sa loob ng 5 milya ng Gladstone","contact.reach.hours":"Oras","contact.reach.hoursVal":"Flexible, ayon sa schedule mo"
   }
 };
 

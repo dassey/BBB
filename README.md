@@ -1,7 +1,7 @@
 # Northland Driving
 
 Website for **Northland Driving** — calm, patient one-on-one driving lessons for
-adults in Gladstone & the Kansas City Northland. Woman-owned. Lessons in English
+adult women in Gladstone & the Kansas City Northland. Woman-owned. Lessons in English
 or Tagalog.
 
 Static multi-page site, no build step. Trilingual (English / Spanish / Tagalog)
