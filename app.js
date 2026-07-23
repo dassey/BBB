@@ -13,7 +13,7 @@ window.ND_EMAIL = "hello@northlanddriving.com";
    Only keys that differ from English need entries here. ---- */
 window.ND_DICT = {
   es:{
-    "nav.about":"Nosotras","nav.pricing":"Precios","nav.permit":"Permiso","nav.contact":"Contacto","nav.book":"Reservar clase",
+    "nav.about":"Nosotras","nav.pricing":"Precios","nav.permit":"Permiso","nav.contact":"Contacto","nav.quiz":"Quiz","nav.book":"Reservar clase",
     "cta.book":"Reservar una clase","cta.pricing":"Ver precios","cta.contact":"Contáctanos","cta.learn":"Cómo funciona","cta.permit":"Guía del permiso","cta.quiz":"Hacer el quiz de estudio",
     "quiz.title":"Quiz de estudio del permiso · Northland Driving","quiz.eyebrow":"Quiz de estudio del permiso","quiz.h1":"Ponte a prueba.","quiz.intro":"Diez preguntas cada vez, elegidas al azar de un banco de treinta. Verás la respuesta y una breve explicación sobre la marcha.","quiz.note":"Solo práctica — este no es el examen oficial. Las preguntas están en inglés, como el examen del estado. Estudia también la Guía del Conductor de Missouri.",
 
@@ -99,7 +99,7 @@ window.ND_DICT = {
   },
 
   tl:{
-    "nav.about":"Tungkol","nav.pricing":"Presyo","nav.permit":"Permit","nav.contact":"Kontak","nav.book":"Mag-book ng lesson",
+    "nav.about":"Tungkol","nav.pricing":"Presyo","nav.permit":"Permit","nav.contact":"Kontak","nav.quiz":"Quiz","nav.book":"Mag-book ng lesson",
     "cta.book":"Mag-book ng lesson","cta.pricing":"Tingnan ang presyo","cta.contact":"Kontakin kami","cta.learn":"Paano ito","cta.permit":"Gabay sa permit","cta.quiz":"Subukan ang study quiz",
     "quiz.title":"Study quiz sa permit · Northland Driving","quiz.eyebrow":"Study quiz sa permit","quiz.h1":"Subukan ang sarili mo.","quiz.intro":"Sampung tanong kada beses, random na kinukuha mula sa bank ng tatlumpu. Makikita mo ang sagot at maikling paliwanag habang naglalaro.","quiz.note":"Praktis lang — hindi ito ang opisyal na test. Nasa English ang mga tanong, tulad ng state exam. Pag-aralan din ang opisyal na Missouri Driver Guide.",
 
