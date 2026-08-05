@@ -55,7 +55,7 @@ CLAUDE.md                    entry point — the loop, read first
     lib.mjs                  shared parsing
   runs/                      run records and screenshots (gitignored)
 .claude/
-  settings.json              permissions, hooks
+  settings.json              permissions
   commands/                  /verify, /harness-improve
 ```
 
