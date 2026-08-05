@@ -1,8 +1,6 @@
-# Research Specs: Northland Driving (BBB Refactoring)
+# Research Specs: Northland Driving (BBB Hero Banner Redesign)
 
-## Core Intent & Driver Profile Changes
-- **Navigation & Brand Change:** Change all "About Mary" references to "Our Drivers".
-- **Mary Reference Rule:** Remove all references to Mary on all pages EXCEPT `about.html` (the "About Driver" page).
-- **Global Replacement Rule:** On `index.html`, `pricing.html`, `permit.html`, `quiz.html`, `contact.html`, `app.js`, and `quiz.js`, replace "Mary" / "Mary's" with "Our Drivers" / "our drivers" / "our female drivers" / "our team".
-- **About Driver Page (`about.html`):** Retain Mary's bio as lead driver while introducing the driver team under "Our Drivers".
-- **Languages:** Maintain English (`en`) and Tagalog (`tl`).
+## Hero Section Architecture Update
+- **Issue:** User noted side-by-side hero layout looked unconventional compared to standard full-width web hero banners.
+- **Solution:** Re-architect the Hero section on `index.html` (and section headers on inner pages) to feature a prominent full-width hero banner with cinematic layout structure.
+- **Visual Design:** Full-width panoramic hero image (`images/hero.jpg`) with floating glassmorphism badging, hero overlay gradients, and centered/stacked layout options for maximum visual impact.

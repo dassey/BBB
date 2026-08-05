@@ -1,6 +1,6 @@
 # Architectural Decisions Log
 
-## Decision 5: Phrasing Shift — "Mary" to "Our Drivers"
+## Decision 6: Hero Banner Layout Overhaul
 - **Date:** 2026-08-04
-- **Decision:** Remove references to "Mary" on all pages except `about.html`. Replace with "our drivers" / "our team" / "Our Drivers".
-- **Rationale:** User requested expanding brand representation to a team model ("Our Drivers") across site pages, while maintaining Mary's specific profile on `about.html`.
+- **Decision:** Replace side-by-side hero split with a wide, full-width hero banner layout on `index.html`.
+- **Rationale:** Addresses user feedback directly. Full-width banners create a more professional, traditional, and striking first impression for modern service websites.
