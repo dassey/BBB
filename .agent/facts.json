@@ -1,5 +1,5 @@
 {
-  "_readme": "Single source of truth for business facts. Change a number HERE first, then propagate to the site and run `npm run check` — the verifier fails until every page and both languages agree. See .agent/HARNESS.md.",
+  "_readme": "Single source of truth for business facts. Change a number HERE first, then propagate to the site and run `npm run check` — the verifier fails until every page agrees. See .agent/HARNESS.md.",
 
   "business": {
     "name": "Northland Driving",
@@ -9,14 +9,12 @@
     "region": "MO",
     "areaServed": ["Gladstone", "Parkville", "North Kansas City", "Liberty"],
     "pickupRadiusMinutes": 10,
-    "languages": ["en", "tl"],
     "audience": "adult women"
   },
 
   "tiers": [
     {
       "id": "t1",
-      "keyPrefix": "pricing.t1",
       "name": "1-Hour Focus Session",
       "price": 85,
       "hours": 1,
@@ -24,14 +22,12 @@
     },
     {
       "id": "t2",
-      "keyPrefix": "pricing.t2",
       "name": "2-Hour Standard / Test Prep",
       "price": 160,
       "hours": 2
     },
     {
       "id": "t3",
-      "keyPrefix": "pricing.t3",
       "name": "3-Session Confidence Package",
       "price": 450,
       "hours": 6
@@ -50,7 +46,6 @@
   "brand": {
     "leadInstructor": "Mary",
     "leadInstructorPagesAllowed": ["about.html"],
-    "leadInstructorKeyPrefixAllowed": ["about."],
-    "note": "Decision 5 (2026-08-04): 'Mary' appears only on about.html and under about.* dictionary keys. Everywhere else the brand voice is 'our drivers' / 'our team'."
+    "note": "Decision 5 (2026-08-04): 'Mary' appears only on about.html. Everywhere else the brand voice is 'our drivers' / 'our team'."
   }
 }

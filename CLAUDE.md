@@ -4,6 +4,9 @@ Static marketing site for a driving school in Gladstone, MO — patient
 one-on-one lessons for adult women, taught in English or Tagalog. Six
 hand-written HTML pages, no build step, deployed to GitHub Pages from `main`.
 
+The *site* is English-only. Tagalog is something the drivers speak, and the
+copy says so; there is no longer a translation layer (Decision 10).
+
 ## Before you edit
 
 ```bash
@@ -20,12 +23,9 @@ first:
 
 - **The header, footer and nav are copy-pasted into all six pages.** There is
   no include. Changing one means changing six (P-01).
-- **English lives in the markup; Tagalog lives in `window.ND_DICT.tl` in
-  `app.js`.** There is no English dictionary — `app.js` harvests it from the
-  inline HTML. Edit both languages in the same commit (P-04, P-08).
 - **Prices come from [`.agent/facts.json`](.agent/facts.json).** Change it
-  first, then propagate to the markup, the Tagalog dictionary, the JSON-LD
-  and the contact form (P-10, P-11).
+  first, then propagate to the markup, the JSON-LD and the contact form
+  (P-10, P-11).
 - **The lead instructor is named only on `about.html`.** Everywhere else uses
   the team voice — "our drivers" (P-13, Decision 5).
 
@@ -40,7 +40,7 @@ first:
 | `quiz.html` · `quiz.js` | Missouri permit practice quiz (30 questions) |
 | `contact.html` | Booking, via a `mailto:` handoff |
 | `styles.css` | Shared design system |
-| `app.js` | Nav, sticky header, EN/TL toggle, FAQ, booking |
+| `app.js` | Nav, sticky header, FAQ, booking |
 
 ## Commands
 
@@ -50,7 +50,7 @@ first:
 | `npm run selftest` | Prove the checks still catch their own failure cases |
 | `npm run verify` | Both of the above — run before committing |
 | `npm run serve` | Static server on :8080 |
-| `npm run runtime` | Real browser, both languages, runtime errors *(optional)* |
+| `npm run runtime` | Real browser, runtime errors *(optional)* |
 | `npm run snapshot` | The same, plus screenshots to `.agent/runs/` |
 
 Setup, including the optional browser pass, is in

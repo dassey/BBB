@@ -88,28 +88,8 @@ export function run(ctx) {
     if (!/<script[^>]+src="app\.js"/.test(src)) {
       findings.push({
         file: page.name,
-        msg: 'does not load app.js — the language toggle and nav will not work',
+        msg: 'does not load app.js — the nav and booking form will not work',
       });
-    }
-
-    const langButtons = [...src.matchAll(/data-lang="([a-z]{2})"/g)].map((m) => m[1]);
-    for (const lang of facts.business.languages) {
-      if (!langButtons.includes(lang)) {
-        findings.push({
-          file: page.name,
-          msg: `no language button for "${lang}"`,
-          hint: `facts.json lists languages: ${facts.business.languages.join(', ')}`,
-        });
-      }
-    }
-    for (const lang of langButtons) {
-      if (!facts.business.languages.includes(lang)) {
-        findings.push({
-          file: page.name,
-          line: at(new RegExp(`data-lang="${lang}"`)),
-          msg: `language button "${lang}" is not a language this site ships`,
-        });
-      }
     }
   }
 

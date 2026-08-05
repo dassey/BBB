@@ -27,33 +27,20 @@ copying is the normal workflow here.
 
 ---
 
-## Bilingual content
+## Bilingual content — retired
 
-**P-04 [checked] · English lives in the markup; Tagalog lives in
-`window.ND_DICT.tl` in `app.js`.** There is no English dictionary — `app.js`
-harvests EN from the inline HTML at load. The markup is the source of truth.
+**P-04 through P-09 are retired (Decision 10, 2026-08-05).** The site shipped
+an EN/TL toggle backed by a Tagalog dictionary in `app.js` and paired
+`_en`/`_tl` fields in `quiz.js`. All of it was removed while the site's
+design is in flux. The `i18n` check is gone with it.
 
-**P-05 [checked] · Every `data-i18n` key needs a `tl` entry.** A missing one
-does not error; it falls back to English and the page is half-translated.
-`i18n` reports these.
+These IDs stay burned — do not reuse the numbers. `memory/failures.md` still
+cites them, and the rules become live again the moment translation returns.
+The history is in git; see Decision 10 for how to get it back.
 
-**P-06 [checked] · A translation must keep the inline markup its English
-source uses.** Dictionary values are assigned to `innerHTML`, so dropping a
-`<b>` or `<span class="cost">` silently changes the layout.
-
-**P-07 [checked] · Never let translations drift out of alignment with the
-markup's ordering.** The Tagalog `pricing.t2.*` and `pricing.t3.*` blocks
-were swapped for months — the keys were valid, the strings were fluent, and
-the pricing page showed Tagalog visitors the wrong product at the wrong
-price. `pricing` now scopes every amount to the tier whose key it sits under.
-
-**P-08 · Edit both languages in the same commit.** A commit that touches
-copy in one language only is the shape every i18n bug in this repo has had.
-
-**P-09 · `quiz.js` uses paired fields, not the dictionary.** Questions carry
-`q_en`/`q_tl`, `o_en`/`o_tl`, `e_en`/`e_tl` and a 0-based `a`. Option arrays
-are indexed in parallel — if they differ in length, one language scores
-wrong. `quiz` checks this.
+**P-09a · `quiz.js` questions carry `q`, `o`, `a`, `e`.** `a` is a 0-based
+index into `o`. If it points past the end, every attempt scores wrong and
+nothing throws. `quiz` checks this.
 
 ---
 

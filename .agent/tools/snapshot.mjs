@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 /**
- * Browser pass: load every page in a real browser, in both languages, and
- * report anything the static checker cannot see — JavaScript exceptions,
- * failed asset requests, and strings that stayed English after switching
- * to Tagalog. Optionally writes screenshots.
+ * Browser pass: load every page in a real browser and report anything the
+ * static checker cannot see — JavaScript exceptions and failed asset
+ * requests. Optionally writes screenshots.
  *
  *   node .agent/tools/snapshot.mjs              # runtime errors + screenshots
  *   node .agent/tools/snapshot.mjs --no-shots   # runtime errors only (fast)
@@ -108,72 +107,47 @@ const shots = [];
 
 try {
   for (const page of pages) {
-    for (const lang of ['en', 'tl']) {
-      const context = await browser.newContext({ viewport: VIEWPORTS[0] });
-      const tab = await context.newPage();
+    const context = await browser.newContext({ viewport: VIEWPORTS[0] });
+    const tab = await context.newPage();
 
-      tab.on('pageerror', (err) => {
-        problems.push({ page, lang, kind: 'exception', detail: err.message });
-      });
-      tab.on('console', (msg) => {
-        if (msg.type() !== 'error') return;
-        const from = msg.location()?.url || '';
-        const external = from && !from.startsWith(`http://localhost:${port}/`);
-        problems.push({ page, lang, kind: external ? 'external' : 'console', detail: msg.text() });
-      });
-      // Third-party origins (web fonts, analytics) fail in offline sandboxes
-      // for reasons that have nothing to do with this site. Record them, but
-      // only our own assets decide pass/fail.
-      const isOurs = (url) => url.startsWith(`http://localhost:${port}/`);
+    tab.on('pageerror', (err) => {
+      problems.push({ page, kind: 'exception', detail: err.message });
+    });
+    tab.on('console', (msg) => {
+      if (msg.type() !== 'error') return;
+      const from = msg.location()?.url || '';
+      const external = from && !from.startsWith(`http://localhost:${port}/`);
+      problems.push({ page, kind: external ? 'external' : 'console', detail: msg.text() });
+    });
+    // Third-party origins (web fonts, analytics) fail in offline sandboxes
+    // for reasons that have nothing to do with this site. Record them, but
+    // only our own assets decide pass/fail.
+    const isOurs = (url) => url.startsWith(`http://localhost:${port}/`);
 
-      tab.on('requestfailed', (req) => {
-        const detail = `${req.url()} — ${req.failure()?.errorText ?? 'failed'}`;
-        problems.push({ page, lang, kind: isOurs(req.url()) ? 'request' : 'external', detail });
-      });
-      tab.on('response', (res) => {
-        if (res.status() >= 400) {
-          problems.push({ page, lang, kind: isOurs(res.url()) ? 'http' : 'external', detail: `${res.status()} ${res.url()}` });
-        }
-      });
-
-      await tab.goto(`http://localhost:${port}/${page}`, { waitUntil: 'networkidle', timeout: 20000 });
-
-      if (lang === 'tl') {
-        const button = tab.locator('.lang button[data-lang="tl"]');
-        if ((await button.count()) === 0) {
-          problems.push({ page, lang, kind: 'i18n', detail: 'no Tagalog toggle button on this page' });
-        } else {
-          await button.first().click();
-          await tab.waitForTimeout(250);
-          const htmlLang = await tab.evaluate(() => document.documentElement.lang);
-          if (htmlLang !== 'tl') {
-            problems.push({ page, lang, kind: 'i18n', detail: `<html lang> stayed "${htmlLang}" after switching to Tagalog` });
-          }
-          const untranslated = await tab.evaluate(() => {
-            const dict = (window.ND_DICT && window.ND_DICT.tl) || {};
-            return [...document.querySelectorAll('[data-i18n]')]
-              .map((el) => el.getAttribute('data-i18n'))
-              .filter((k) => !(k in dict));
-          });
-          for (const key of untranslated) {
-            problems.push({ page, lang, kind: 'i18n', detail: `"${key}" rendered in English` });
-          }
-        }
+    tab.on('requestfailed', (req) => {
+      const detail = `${req.url()} — ${req.failure()?.errorText ?? 'failed'}`;
+      problems.push({ page, kind: isOurs(req.url()) ? 'request' : 'external', detail });
+    });
+    tab.on('response', (res) => {
+      if (res.status() >= 400) {
+        problems.push({ page, kind: isOurs(res.url()) ? 'http' : 'external', detail: `${res.status()} ${res.url()}` });
       }
+    });
 
-      if (!has('no-shots')) {
-        mkdirSync(OUT, { recursive: true });
-        for (const vp of VIEWPORTS) {
-          await tab.setViewportSize({ width: vp.width, height: vp.height });
-          await tab.waitForTimeout(150);
-          const file = join(OUT, `${page.replace(/\.html$/, '')}-${lang}-${vp.name}.png`);
-          await tab.screenshot({ path: file, fullPage: true });
-          shots.push(file);
-        }
+    await tab.goto(`http://localhost:${port}/${page}`, { waitUntil: 'networkidle', timeout: 20000 });
+
+    if (!has('no-shots')) {
+      mkdirSync(OUT, { recursive: true });
+      for (const vp of VIEWPORTS) {
+        await tab.setViewportSize({ width: vp.width, height: vp.height });
+        await tab.waitForTimeout(150);
+        const file = join(OUT, `${page.replace(/\.html$/, '')}-${vp.name}.png`);
+        await tab.screenshot({ path: file, fullPage: true });
+        shots.push(file);
       }
-
-      await context.close();
     }
+
+    await context.close();
   }
 } finally {
   await browser.close();
@@ -185,7 +159,7 @@ const external = problems.filter((p) => p.kind === 'external');
 
 const byPage = new Map();
 for (const p of ours) {
-  const key = `${p.page} (${p.lang})`;
+  const key = p.page;
   if (!byPage.has(key)) byPage.set(key, []);
   byPage.get(key).push(p);
 }
@@ -218,4 +192,4 @@ if (ours.length) {
   console.log(`BROWSER PASS FAILED — ${ours.length} problem${ours.length === 1 ? '' : 's'} across ${pages.length} pages`);
   process.exit(1);
 }
-console.log(`BROWSER PASS CLEAN — ${pages.length} pages × 2 languages, no runtime errors`);
+console.log(`BROWSER PASS CLEAN — ${pages.length} pages, no runtime errors`);

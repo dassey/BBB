@@ -5,8 +5,8 @@ checked, remembered and improved. Install it with [`INSTALL.md`](INSTALL.md).
 
 The design follows Lilian Weng's *Harness Engineering for Self-Improvement*
 (2026-07-04), adapted to what this repo actually is: six hand-written HTML
-pages, two languages, no build step, and a business whose prices are quoted
-in nine places.
+pages, no build step, and a business whose prices are quoted in several
+places at once.
 
 ---
 
@@ -16,17 +16,15 @@ The site has no framework and no tests, so nothing catches the failure mode
 it actually has: **a change applied to some surfaces but not all of them.**
 
 Every page duplicates the header and footer. Every price appears in the
-markup, in the Tagalog dictionary, in JSON-LD, and in a booking form. Every
-translatable string exists twice, in two files, in two languages. A careful
-edit still misses one, and nothing errors — the page just quietly says the
-wrong thing to a subset of visitors.
+markup, in JSON-LD, and in a booking form. A careful edit still misses one,
+and nothing errors — the page just quietly says the wrong thing.
 
 The first run of this verifier found exactly that, sitting in `main`: the
 Tagalog dictionary had pricing tiers 2 and 3 swapped, so Tagalog-speaking
 visitors saw the *2-hour* card labelled "3-Session Confidence Package" with
 a button reading "Kunin ang Package ($450)" — the wrong product at the wrong
-price, on the pricing page, in the language the site advertises as its
-reason to exist. It had been live since the multi-page redesign.
+price. It had been live since the multi-page redesign. That dictionary is
+gone now (Decision 10), but the shape of the bug is the reason this exists.
 
 That is the argument for the whole thing. The point of a harness is to make
 a class of mistake impossible to ship twice.
@@ -168,11 +166,10 @@ stylistic noise and misses every bug in `failures.md`.
 **No CI.** Deployment is GitHub Pages from `main`. Adding CI is a reasonable
 next step; the gate is `npm run verify` either way.
 
-**No copy or translation quality checks.** Not decidable. The i18n rules
-check *coverage* and *structure* — that a key has a Tagalog string, that it
-kept its inline markup, that it does not quote another tier's price. Whether
-the Tagalog is natural is a human question, and the harness does not pretend
-to answer it.
+**No copy quality checks.** Not decidable. The rules check *structure* and
+*consistency* — that a price matches `facts.json`, that a nav link resolves,
+that a page carries its own canonical. Whether the writing is any good is a
+human question, and the harness does not pretend to answer it.
 
 **No subagent orchestration.** The article covers parallel subagents and
 their file-backed outputs; this repo is six pages and one verifier that runs

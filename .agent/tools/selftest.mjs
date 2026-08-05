@@ -30,11 +30,6 @@ const MUTATIONS = [
     apply: (dir) => edit(dir, 'index.html', (s) => s.replace('href="about.html"', 'href="about-old.html"')),
   },
   {
-    name: 'a translation is deleted',
-    rule: 'i18n',
-    apply: (dir) => edit(dir, 'app.js', (s) => s.replace(/^\s*"pricing\.per":.*$/m, '')),
-  },
-  {
     name: 'the lead instructor is named outside about.html',
     rule: 'brand',
     apply: (dir) => edit(dir, 'index.html', (s) => s.replace('<main id="main">', '<main id="main"><p>Mary can help.</p>')),
@@ -45,10 +40,9 @@ const MUTATIONS = [
     apply: (dir) => edit(dir, 'pricing.html', (s) => s.replace('class="price">$160', 'class="price">$175')),
   },
   {
-    name: 'a translated tier quotes another tier\'s price',
+    name: 'the contact form offers a price that is not a real tier',
     rule: 'pricing',
-    apply: (dir) =>
-      edit(dir, 'app.js', (s) => s.replace(/"pricing\.t2\.btn":\s*"[^"]*"/, '"pricing.t2.btn": "Kunin ang Package ($450)"')),
+    apply: (dir) => edit(dir, 'contact.html', (s) => s.replace('Focus Session ($85)', 'Focus Session ($95)')),
   },
   {
     name: 'JSON-LD keeps a stale offer price',
@@ -61,9 +55,9 @@ const MUTATIONS = [
     apply: (dir) => edit(dir, 'quiz.js', (s) => s.replace(/\n(\s*)a: \d+,/, '\n$1a: 99,')),
   },
   {
-    name: 'a quiz question loses its Tagalog text',
+    name: 'a quiz question loses its explanation',
     rule: 'quiz',
-    apply: (dir) => edit(dir, 'quiz.js', (s) => s.replace(/\n\s*q_tl: "[^"]*",/, '')),
+    apply: (dir) => edit(dir, 'quiz.js', (s) => s.replace(/\n\s*e: "[^"]*"/, '')),
   },
   {
     name: 'a copied page keeps the canonical URL it was copied from',

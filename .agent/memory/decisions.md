@@ -50,3 +50,26 @@
   edit, deleting the brand rule that `facts.json` and the `brand` check both
   point at. The decision survived only because it was also encoded in a
   check. Nothing would have caught the loss of the prose.
+
+## Decision 10: The Site Ships English-Only While the Design Settles
+- **Date:** 2026-08-05
+- **Decision:** Remove the EN/TL toggle, the `window.ND_DICT.tl` dictionary,
+  the `data-i18n` hooks on all six pages, and the paired `_en`/`_tl` fields
+  in `quiz.js`. The `i18n` check and playbook rules P-04–P-09 retire with
+  them. **Temporary — until the site's design is settled.**
+- **Rationale:** Owner call. Every copy change cost two edits in two files
+  and the dictionary was already drifting (ten orphaned keys and a dropped
+  inline tag at the time of removal). With the design in flux that tax is
+  paid on work that is about to be thrown away.
+- **Kept deliberately:** the *claim* that lessons are taught in Tagalog —
+  meta descriptions, JSON-LD, the `EN · TL` stat, the `about.v3` card. The
+  drivers speak Tagalog; that is a business differentiator and it is
+  independent of whether the website translates itself.
+- **Consequence:** `facts.business.languages` and
+  `brand.leadInstructorKeyPrefixAllowed` are gone from `facts.json`. The
+  `pricing`, `brand` and `structure` checks lost their dictionary-scoped
+  sections rather than keeping them as blocks that silently never fire
+  (P-16). `quiz` now requires `q`, `o`, `a`, `e`.
+- **To restore:** `git revert` the removal commit on the `remove-i18n`
+  branch, or `git show <commit>^:app.js` for the dictionary alone. The
+  Tagalog strings are not lost, only unshipped.
