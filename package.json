@@ -1,0 +1,23 @@
+{
+  "name": "northland-driving",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static site for Northland Driving, plus the agent harness that verifies it.",
+  "type": "module",
+  "scripts": {
+    "check": "node .agent/tools/check.mjs",
+    "check:json": "node .agent/tools/check.mjs --json",
+    "check:strict": "node .agent/tools/check.mjs --strict",
+    "selftest": "node .agent/tools/selftest.mjs",
+    "serve": "node .agent/tools/serve.mjs",
+    "snapshot": "node .agent/tools/snapshot.mjs",
+    "runtime": "node .agent/tools/snapshot.mjs --no-shots",
+    "verify": "npm run check && npm run selftest"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

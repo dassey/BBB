@@ -29,4 +29,28 @@ Static multi-page site, no build step. Bilingual (English / Tagalog) via a toggl
 
 ## Run it
 
-Open `index.html` in any modern web browser.
+Open `index.html` in any modern web browser, or serve it properly:
+
+```bash
+npm run serve      # http://localhost:8080
+```
+
+## Verify it
+
+The site duplicates its header, footer, prices and every translatable string
+across six hand-edited pages and two languages. The recurring defect is a
+change applied to some of those surfaces but not all of them — and it never
+throws, it just quietly says the wrong thing.
+
+```bash
+npm run check      # the gate: under a second, no dependencies
+npm run verify     # the gate, plus proof the checks still work
+```
+
+Eight checks cover link integrity, Tagalog coverage, brand boundaries, price
+agreement across pages and JSON-LD, quiz-bank integrity, per-page structure,
+nav consistency and font wiring. Node 18+ is the only requirement.
+
+Setup — including the optional browser pass — is in
+[`.agent/INSTALL.md`](.agent/INSTALL.md). How it is built and how to extend
+it is in [`.agent/HARNESS.md`](.agent/HARNESS.md).
