@@ -12,10 +12,17 @@ import { stripComments, lineOf } from '../lib.mjs';
 export const id = 'assets';
 export const title = 'Stylesheets and web fonts are wired consistently';
 
+/* Families that ship with the OS. Naming one is not a request for a webfont,
+ * so it can never be a "declared but never loaded" bug. Keep the monospace
+ * names here too — a stack like `'JetBrains Mono', ui-monospace, Menlo,
+ * monospace` is the normal way to write one. */
 const GENERIC = new Set([
   'system-ui', 'sans-serif', 'serif', 'monospace', 'cursive', 'fantasy',
   'ui-monospace', 'ui-sans-serif', 'ui-serif', '-apple-system', 'blinkmacsystemfont',
   'segoe ui', 'roboto', 'helvetica neue', 'helvetica', 'arial', 'inherit', 'initial', 'unset',
+  'sfmono-regular', 'sf mono', 'menlo', 'monaco', 'consolas', 'cascadia mono',
+  'liberation mono', 'dejavu sans mono', 'noto sans mono', 'courier new', 'courier',
+  'segoe ui mono', 'andale mono', 'apple color emoji', 'segoe ui emoji',
 ]);
 
 export function run(ctx) {

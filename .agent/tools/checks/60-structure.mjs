@@ -13,7 +13,7 @@ export const title = 'Page structure, accessibility and SEO basics';
 
 export function run(ctx) {
   const findings = [];
-  const facts = JSON.parse(ctx.read('.agent/facts.json'));
+  const facts = JSON.parse(ctx.read('data/facts.json'));
   const domain = facts.business.domain;
 
   for (const page of ctx.pages) {

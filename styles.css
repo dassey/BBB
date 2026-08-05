@@ -1,56 +1,82 @@
 /* =========================================================
    Northland Driving — Design System
-   Modern, Warm, Ultra-Clean Design System
-   Palette: Soft Warm Sage Green, Cream/Stone, Deep Slate, Warm Gold Accents
+   Warm & modern. Palette is built out from the coral already
+   in the brand mark, on warm stone neutrals and espresso darks.
+   No cold blue-greys anywhere — that is what "warm" means here.
+
+   Tokens are semantic (--accent, --ink, --paper). The older
+   names (--sage, --gold, --asphalt) are kept as aliases so
+   existing rules keep working; prefer the semantic names in
+   anything new.
+
+   Theming: an inline script in each <head> stamps
+   data-theme="light|dark" on <html> before first paint, so
+   there is exactly one dark block below and no flash.
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap');
-
 :root {
-  /* Palette: Cream & Stone Backgrounds */
-  --paper: #f9f7f3;        /* Soft warm stone background */
-  --paper-2: #f2eee5;      /* Slightly deeper stone for alternating sections */
-  --paper-3: #e8e2d4;      /* Deep stone divider accent */
-  --surface: #ffffff;      /* Pure crisp white surface */
-  --surface-warm: #fdfcf9;  /* Warm white tint */
+  /* ---- Warm stone backgrounds ---- */
+  --paper: #faf8f7;
+  --paper-2: #f5f0ec;
+  --paper-3: #ebe2dc;
+  --surface: #ffffff;
+  --surface-warm: #fffcfb;
 
-  /* Deep Slate Typography & Ink */
-  --ink: #182026;          /* Deep slate headings & primary text */
-  --ink-soft: #2c3846;     /* Body text */
-  --muted: #576575;        /* Muted body & descriptions */
-  --faint: #8493a5;        /* Faint captions & kickers */
+  /* ---- Warm ink (never blue-grey) ---- */
+  --ink: #1c1917;
+  --ink-soft: #3f3733;
+  --muted: #6d625c;
+  --faint: #9b8f88;
 
-  /* Warm Stone Lines & Borders */
-  --line: #e2ded4;         /* Warm stone line */
-  --line-2: #d3cec0;       /* Medium stone border */
+  /* ---- Warm lines ---- */
+  --line: #eae1db;
+  --line-2: #d8ccc4;
 
-  /* Soft Warm Sage Green (Primary Brand Accent) */
-  --sage: #3a6b52;         /* Rich warm sage green */
-  --sage-hover: #2b523e;   /* Darker sage hover state */
-  --sage-light: #eef5f1;   /* Soft sage background tint */
-  --sage-border: #c2dbc9;  /* Subtle sage border */
-  --sage-glow: rgba(58, 107, 82, 0.22);
+  /* ---- Accent: clay/coral, taken from the brand mark ---- */
+  --accent: #c0533a;
+  --accent-hover: #a4432d;
+  --accent-light: #fcf0ec;
+  --accent-border: #f2d2c6;
+  --accent-glow: rgba(192, 83, 58, 0.22);
+  --accent-grad: linear-gradient(135deg, #d4674a 0%, #a8462f 100%);
 
-  /* Warm Gold Accent Badges & Highlights */
-  --gold: #c9932b;         /* Rich warm gold */
-  --gold-hover: #b07d1e;   /* Deep gold hover */
-  --gold-bg: #fef8eb;      /* Light gold badge tint */
-  --gold-border: #f5e4b8;  /* Gold border highlight */
-  --gold-ink: #855b0a;     /* Deep gold badge text */
-  --gold-grad: linear-gradient(135deg, #d8a53c 0%, #b88320 100%);
+  /* ---- Highlight: soft blush for badges and flags ---- */
+  --highlight: #b4552f;
+  --highlight-hover: #94421f;
+  --highlight-bg: #fbeee8;
+  --highlight-border: #f1d7cc;
+  --highlight-ink: #8a3a22;
+  --highlight-grad: linear-gradient(135deg, #cf7a4e 0%, #a8542c 100%);
 
-  /* Dark Panels / Charcoal Asphalt Theme */
-  --asphalt: #14191e;
-  --asphalt-2: #1b232c;
-  --asphalt-3: #27313d;
-  --asphalt-line: #344252;
+  /* ---- Espresso dark panels (warm, not charcoal-blue) ---- */
+  --dark: #201814;
+  --dark-2: #2a201b;
+  --dark-3: #3a2c25;
+  --dark-line: #4c3a31;
 
-  /* Typography Families */
-  --f-display: 'Outfit', 'Overpass', system-ui, -apple-system, sans-serif;
+  /* ---- Legacy aliases — existing rules resolve through these ---- */
+  --sage: var(--accent);
+  --sage-hover: var(--accent-hover);
+  --sage-light: var(--accent-light);
+  --sage-border: var(--accent-border);
+  --sage-glow: var(--accent-glow);
+  --gold: var(--highlight);
+  --gold-hover: var(--highlight-hover);
+  --gold-bg: var(--highlight-bg);
+  --gold-border: var(--highlight-border);
+  --gold-ink: var(--highlight-ink);
+  --gold-grad: var(--highlight-grad);
+  --asphalt: var(--dark);
+  --asphalt-2: var(--dark-2);
+  --asphalt-3: var(--dark-3);
+  --asphalt-line: var(--dark-line);
+
+  /* ---- Typography ---- */
+  --f-display: 'Outfit', system-ui, -apple-system, sans-serif;
   --f-body: 'Inter', system-ui, -apple-system, sans-serif;
-  --f-mono: 'JetBrains Mono', 'Overpass Mono', monospace;
+  --f-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Shape & Geometry Tokens */
+  /* ---- Shape ---- */
   --container: 1140px;
   --header-h: 74px;
   --r-xs: 6px;
@@ -60,47 +86,106 @@
   --r-xl: 32px;
   --r-full: 9999px;
 
-  /* Realistic Elevation & Card Shadows */
-  --shadow-sm: 0 2px 4px rgba(24, 32, 38, 0.04), 0 1px 2px rgba(24, 32, 38, 0.05);
-  --shadow: 0 4px 14px -2px rgba(24, 32, 38, 0.06), 0 12px 28px -4px rgba(24, 32, 38, 0.07);
-  --shadow-lg: 0 18px 42px -6px rgba(24, 32, 38, 0.11), 0 6px 16px -2px rgba(24, 32, 38, 0.05);
-  --shadow-gold: 0 6px 18px rgba(201, 147, 43, 0.28);
-  --shadow-sage: 0 8px 24px rgba(58, 107, 82, 0.25);
+  /* ---- Elevation (warm-tinted, not neutral black) ---- */
+  --shadow-sm: 0 2px 4px rgba(40, 26, 20, 0.04), 0 1px 2px rgba(40, 26, 20, 0.05);
+  --shadow: 0 4px 14px -2px rgba(40, 26, 20, 0.06), 0 12px 28px -4px rgba(40, 26, 20, 0.07);
+  --shadow-lg: 0 18px 42px -6px rgba(40, 26, 20, 0.11), 0 6px 16px -2px rgba(40, 26, 20, 0.05);
+  --shadow-gold: 0 6px 18px rgba(180, 85, 47, 0.26);
+  --shadow-sage: 0 8px 24px rgba(192, 83, 58, 0.24);
 
-  /* Motion & Easing */
+  /* ---- Fixed header surface ---- */
+  --header-bg: rgba(250, 248, 247, 0.84);
+  --header-bg-stuck: rgba(250, 248, 247, 0.95);
+
+  /* ---- Motion ---- */
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  color-scheme: light;
 }
 
 /* =========================================================
-   Dark Mode Theme Support
+   Dark theme — warm espresso, not blue-black.
+   Applied by [data-theme="dark"], which the head script sets
+   from a saved choice or the OS preference.
    ========================================================= */
+:root[data-theme="dark"] {
+  --paper: #17120f;
+  --paper-2: #1e1815;
+  --paper-3: #2a211c;
+  --surface: #211a16;
+  --surface-warm: #271f1a;
+
+  --ink: #f8f3ef;
+  --ink-soft: #e0d4cc;
+  --muted: #a89a91;
+  --faint: #7e716a;
+
+  --line: #332a25;
+  --line-2: #473a33;
+
+  /* Coral lifts on a dark ground so it keeps its contrast */
+  --accent: #e8785a;
+  --accent-hover: #f29074;
+  --accent-light: rgba(232, 120, 90, 0.14);
+  --accent-border: rgba(232, 120, 90, 0.38);
+  --accent-glow: rgba(232, 120, 90, 0.28);
+  --accent-grad: linear-gradient(135deg, #e8785a 0%, #c0533a 100%);
+
+  --highlight: #e09068;
+  --highlight-hover: #eda67f;
+  --highlight-bg: rgba(224, 144, 104, 0.15);
+  --highlight-border: rgba(224, 144, 104, 0.36);
+  --highlight-ink: #f2bd9c;
+  --highlight-grad: linear-gradient(135deg, #e09068 0%, #b4552f 100%);
+
+  --dark: #120e0b;
+  --dark-2: #1a1411;
+  --dark-3: #261d18;
+  --dark-line: #3a2c25;
+
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 6px 18px rgba(224, 144, 104, 0.22);
+  --shadow-sage: 0 8px 24px rgba(232, 120, 90, 0.22);
+
+  --header-bg: rgba(23, 18, 15, 0.82);
+  --header-bg-stuck: rgba(23, 18, 15, 0.94);
+
+  color-scheme: dark;
+}
+
+/* No-JS fallback: honour the OS preference when nothing stamped
+   data-theme. Kept to the same values as the block above. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #11161b;
-    --paper-2: #171f27;
-    --paper-3: #222c37;
-    --surface: #1d2631;
-    --surface-warm: #222d3a;
-    
-    --ink: #f0f4f8;
-    --ink-soft: #cbd5e1;
-    --muted: #94a3b8;
-    --faint: #64748b;
-    
-    --line: #2c3847;
-    --line-2: #3a495c;
-    
-    --sage-light: rgba(58, 107, 82, 0.22);
-    --sage-border: rgba(58, 107, 82, 0.45);
-    
-    --gold-bg: rgba(201, 147, 43, 0.16);
-    --gold-border: rgba(201, 147, 43, 0.38);
-    --gold-ink: #f5d082;
-    
-    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
-    --shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+  :root:not([data-theme]) {
+    --paper: #17120f;
+    --paper-2: #1e1815;
+    --paper-3: #2a211c;
+    --surface: #211a16;
+    --surface-warm: #271f1a;
+    --ink: #f8f3ef;
+    --ink-soft: #e0d4cc;
+    --muted: #a89a91;
+    --faint: #7e716a;
+    --line: #332a25;
+    --line-2: #473a33;
+    --accent: #e8785a;
+    --accent-hover: #f29074;
+    --accent-light: rgba(232, 120, 90, 0.14);
+    --accent-border: rgba(232, 120, 90, 0.38);
+    --highlight: #e09068;
+    --highlight-bg: rgba(224, 144, 104, 0.15);
+    --highlight-border: rgba(224, 144, 104, 0.36);
+    --highlight-ink: #f2bd9c;
+    --dark: #120e0b;
+    --dark-2: #1a1411;
+    --dark-3: #261d18;
+    --dark-line: #3a2c25;
+    --header-bg: rgba(23, 18, 15, 0.82);
+    --header-bg-stuck: rgba(23, 18, 15, 0.94);
+    color-scheme: dark;
   }
 }
 
@@ -114,6 +199,8 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Anchor targets must clear the fixed header. */
+  scroll-padding-top: calc(var(--header-h) + 12px);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -136,7 +223,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  /* `clip`, not `hidden`: it stops sideways scroll without turning body
+     into a scroll container, which is what broke the pinned header. */
+  overflow-x: clip;
+  /* The header is fixed, so the page needs to start below it. */
+  padding-top: var(--header-h);
 }
 
 img, svg {
@@ -246,7 +337,7 @@ p {
   padding: 5px 14px;
   border-radius: var(--r-full);
   margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(201, 147, 43, 0.06);
+  box-shadow: 0 1px 3px rgba(180, 85, 47, 0.06);
 }
 
 .eyebrow::before {
@@ -335,7 +426,7 @@ p {
 .btn-primary:hover {
   --bg: var(--sage-hover);
   --bd: var(--sage-hover);
-  box-shadow: 0 12px 28px rgba(58, 107, 82, 0.35);
+  box-shadow: 0 12px 28px rgba(192, 83, 58, 0.35);
 }
 
 .btn-dark {
@@ -420,11 +511,16 @@ p {
 /* =========================================================
    Glassmorphism Header & Navigation
    ========================================================= */
+/* Fixed, not sticky. `body` carries `overflow-x: clip` to stop sideways
+   scroll; when that was `hidden` it made body a scroll container and
+   silently killed `position: sticky` here — the header would not pin. */
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
-  background: rgba(249, 247, 243, 0.84);
+  background: var(--header-bg);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid rgba(226, 222, 212, 0.6);
@@ -432,7 +528,7 @@ p {
 }
 
 .site-header.is-stuck {
-  background: rgba(249, 247, 243, 0.95);
+  background: var(--header-bg-stuck);
   border-bottom-color: var(--line);
   box-shadow: var(--shadow-sm);
 }
@@ -500,7 +596,7 @@ p {
 
 .main-nav a:hover {
   color: var(--ink);
-  background: rgba(24, 32, 38, 0.05);
+  background: rgba(40, 26, 20, 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -521,6 +617,53 @@ p {
   gap: 12px;
 }
 
+/* Theme Toggle (light / dark) */
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: var(--r-full);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.18s var(--ease), border-color 0.18s var(--ease),
+    background 0.18s var(--ease), transform 0.18s var(--ease);
+}
+
+.theme-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.theme-toggle svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Show the icon for the theme you would switch *to*. */
+.theme-toggle .icon-moon { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .theme-toggle .icon-sun { display: none; }
+  :root:not([data-theme]) .theme-toggle .icon-moon { display: block; }
+}
+
 /* Mobile Nav Toggle Button */
 .nav-toggle {
   display: none;
@@ -538,7 +681,7 @@ p {
 }
 
 .nav-toggle:hover {
-  background: rgba(24, 32, 38, 0.04);
+  background: rgba(40, 26, 20, 0.04);
 }
 
 .nav-toggle span {
@@ -576,7 +719,7 @@ p {
     align-items: stretch;
     gap: 4px;
     margin: 0;
-    background: rgba(249, 247, 243, 0.97);
+    background: rgba(250, 248, 247, 0.97);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--line);
@@ -741,9 +884,9 @@ p {
   border: 4px solid var(--surface);
   box-shadow: 
     0 0 0 1px var(--line),
-    0 10px 28px -4px rgba(24, 32, 38, 0.08),
-    0 24px 56px -8px rgba(24, 32, 38, 0.14),
-    0 36px 80px -16px rgba(58, 107, 82, 0.12);
+    0 10px 28px -4px rgba(40, 26, 20, 0.08),
+    0 24px 56px -8px rgba(40, 26, 20, 0.14),
+    0 36px 80px -16px rgba(192, 83, 58, 0.12);
   overflow: hidden;
   background: var(--asphalt-2);
   transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.4s var(--ease);
@@ -763,9 +906,9 @@ p {
   transform: translateY(-4px);
   box-shadow: 
     0 0 0 1.5px var(--sage-border),
-    0 16px 36px -4px rgba(24, 32, 38, 0.1),
-    0 32px 72px -8px rgba(24, 32, 38, 0.18),
-    0 48px 96px -16px rgba(58, 107, 82, 0.2);
+    0 16px 36px -4px rgba(40, 26, 20, 0.1),
+    0 32px 72px -8px rgba(40, 26, 20, 0.18),
+    0 48px 96px -16px rgba(192, 83, 58, 0.2);
 }
 
 .hero-banner-img {
@@ -936,8 +1079,8 @@ img[src*="og"] {
 
 .panel-dark .eyebrow {
   color: var(--gold-ink);
-  background: rgba(201, 147, 43, 0.18);
-  border-color: rgba(201, 147, 43, 0.4);
+  background: rgba(180, 85, 47, 0.18);
+  border-color: rgba(180, 85, 47, 0.4);
 }
 
 .panel-dark .eyebrow::before {
@@ -1785,7 +1928,7 @@ img[src*="og"] {
   outline: 2px solid var(--gold);
   outline-offset: 1px;
   border-color: transparent;
-  box-shadow: 0 0 0 3px rgba(201, 147, 43, 0.2);
+  box-shadow: 0 0 0 3px rgba(180, 85, 47, 0.2);
 }
 
 .book-form .btn {

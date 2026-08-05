@@ -1,6 +1,6 @@
 /**
  * Prices are quoted across six pages, the JSON-LD and a booking form.
- * .agent/facts.json is the single source of truth; this check fails until
+ * data/facts.json is the single source of truth; this check fails until
  * every surface agrees with it.
  *
  * Any dollar amount a page prints must be one facts.json knows about —
@@ -14,7 +14,7 @@ export const title = 'Prices agree across pages and JSON-LD';
 
 export function run(ctx) {
   const findings = [];
-  const facts = JSON.parse(ctx.read('.agent/facts.json'));
+  const facts = JSON.parse(ctx.read('data/facts.json'));
   const tiers = facts.tiers;
   const base = tiers.find((t) => t.isBaseHourly) || tiers[0];
   const canonical = new Set(tiers.map((t) => t.price));
@@ -60,7 +60,7 @@ export function run(ctx) {
           file: pricingPage.name,
           line: lineOf(src, m.index),
           msg: `tier ${tier.id} shows $${amount} but facts.json says $${tier.price}`,
-          hint: 'Update .agent/facts.json first if the price really changed, then propagate.',
+          hint: 'Update data/facts.json first if the price really changed, then propagate.',
         });
       }
     }
@@ -110,7 +110,7 @@ export function run(ctx) {
             file: contactPage.name,
             line: lineOf(src, m.index),
             msg: `booking option "${m[1].trim()}" quotes $${amount}, which is not a tier price`,
-            hint: `Tier prices: ${tiers.map((t) => '$' + t.price).join(', ')}. Update .agent/facts.json first if it really changed.`,
+            hint: `Tier prices: ${tiers.map((t) => '$' + t.price).join(', ')}. Update data/facts.json first if it really changed.`,
           });
         }
       }

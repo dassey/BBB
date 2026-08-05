@@ -23,7 +23,7 @@ first:
 
 - **The header, footer and nav are copy-pasted into all six pages.** There is
   no include. Changing one means changing six (P-01).
-- **Prices come from [`.agent/facts.json`](.agent/facts.json).** Change it
+- **Prices come from [`data/facts.json`](data/facts.json).** Change it
   first, then propagate to the markup, the JSON-LD and the contact form
   (P-10, P-11).
 - **The lead instructor is named only on `about.html`.** Everywhere else uses
@@ -39,8 +39,10 @@ first:
 | `permit.html` | Missouri permit guide |
 | `quiz.html` · `quiz.js` | Missouri permit practice quiz (30 questions) |
 | `contact.html` | Booking, via a `mailto:` handoff |
-| `styles.css` | Shared design system |
-| `app.js` | Nav, sticky header, FAQ, booking |
+| `styles.css` | Shared design system — tokens at the top, one dark block |
+| `app.js` | Nav, fixed header, theme toggle, FAQ, booking |
+| `webmcp.js` | Agent-facing tools via `document.modelContext` |
+| `data/facts.json` | Business facts. **Served** — the site and the tools both read it |
 
 ## Commands
 

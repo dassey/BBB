@@ -46,7 +46,7 @@ nothing throws. `quiz` checks this.
 
 ## Business facts
 
-**P-10 [checked] · `.agent/facts.json` is the source of truth for prices,
+**P-10 [checked] · `data/facts.json` is the source of truth for prices,
 contact details and service area.** Change it first, then propagate. The
 verifier fails until every surface agrees.
 

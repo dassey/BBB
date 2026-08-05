@@ -17,6 +17,44 @@ window.ND_EMAIL = "hello@northlanddriving.com";
   $$("[data-email-display]").forEach(function(el){ el.textContent = window.ND_EMAIL; });
   $$("[data-email-link]").forEach(function(el){ el.setAttribute("href","mailto:"+window.ND_EMAIL); });
 
+  /* ---- Light / dark theme ----
+     The inline <head> script already stamped data-theme before paint; this
+     only handles clicks and keeps the label honest. */
+  var root=document.documentElement;
+  var themeBtn=$("#themeToggle");
+
+  function labelTheme(){
+    if(!themeBtn) return;
+    var dark=root.getAttribute("data-theme")==="dark";
+    themeBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+  }
+
+  if(themeBtn){
+    labelTheme();
+    themeBtn.addEventListener("click",function(){
+      var next=root.getAttribute("data-theme")==="dark" ? "light" : "dark";
+      root.setAttribute("data-theme",next);
+      try{localStorage.setItem("nd_theme",next);}catch(e){}
+      labelTheme();
+      // Open accordions are height-locked in px; re-measure after the swap.
+      $$(".qa[aria-expanded='true']").forEach(function(qa){
+        var a=$(".ans",qa);
+        if(a) a.style.maxHeight=a.scrollHeight+"px";
+      });
+    });
+  }
+
+  // Follow the OS only while the visitor has not chosen for themselves.
+  var mq=window.matchMedia("(prefers-color-scheme: dark)");
+  var onSystemChange=function(e){
+    var saved=null; try{saved=localStorage.getItem("nd_theme");}catch(err){}
+    if(saved==="light"||saved==="dark") return;
+    root.setAttribute("data-theme", e.matches ? "dark" : "light");
+    labelTheme();
+  };
+  if(mq.addEventListener) mq.addEventListener("change",onSystemChange);
+  else if(mq.addListener) mq.addListener(onSystemChange);
+
   /* ---- Sticky header state ---- */
   var header=$("#siteHeader");
   if(header){

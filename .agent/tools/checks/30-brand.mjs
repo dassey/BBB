@@ -13,7 +13,7 @@ export const title = 'Lead-instructor naming stays inside its boundary';
 
 export function run(ctx) {
   const findings = [];
-  const facts = JSON.parse(ctx.read('.agent/facts.json'));
+  const facts = JSON.parse(ctx.read('data/facts.json'));
   const name = facts.brand.leadInstructor;
   const allowedPages = new Set(facts.brand.leadInstructorPagesAllowed);
   const re = new RegExp(`\\b${name}\\b`, 'g');

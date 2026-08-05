@@ -8,6 +8,9 @@
     "baseCity": "Gladstone",
     "region": "MO",
     "areaServed": ["Gladstone", "Parkville", "North Kansas City", "Liberty"],
+    "areaServedAliases": ["NKC", "Kansas City North", "KC Northland", "Northland"],
+    "_areaServedZipsNote": "DELIBERATELY EMPTY. Fill in the ZIPs that are genuinely inside the free pick-up radius. The service-area tool matches city and neighbourhood names until this is populated, and says 'contact us' for anything else — better than confidently guessing wrong about a free service.",
+    "areaServedZips": [],
     "pickupRadiusMinutes": 10,
     "audience": "adult women"
   },

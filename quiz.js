@@ -363,5 +363,38 @@
     }
   }
 
+  /* Small read/act surface so webmcp.js can drive the quiz without
+     reaching into the DOM and guessing at button positions. */
+  window.ND_QUIZ = {
+    start: start,
+    getState: function(){
+      if(!state) return null;
+      var item = state.list[state.idx];
+      return {
+        index: state.idx,
+        total: TOTAL,
+        score: state.score,
+        finished: state.finished,
+        answered: state.answers[state.idx] != null,
+        question: item ? item.q : null,
+        options: item ? item.opts.map(function(o){ return o.text; }) : [],
+        explanation: (item && state.answers[state.idx] != null) ? item.e : null
+      };
+    },
+    answer: function(i){
+      if(!state || state.finished) return false;
+      if(state.answers[state.idx] != null) return false;
+      if(typeof i !== "number" || i < 0 || i >= state.list[state.idx].opts.length) return false;
+      answer(i);
+      return true;
+    },
+    next: function(){
+      if(!state || state.finished) return false;
+      if(state.answers[state.idx] == null) return false;
+      next();
+      return true;
+    }
+  };
+
   start();
 })();

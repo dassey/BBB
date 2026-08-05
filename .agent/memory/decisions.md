@@ -6,7 +6,7 @@
 - **Rationale:** User requested expanding brand representation to a team model ("Our Drivers") across site pages, while maintaining Mary's specific profile on `about.html`.
 - **Note (2026-08-05):** This entry was overwritten in `c1f2a07` and restored
   when that commit merged with the harness branch. It is load-bearing:
-  `.agent/facts.json` and the `brand` check both cite "Decision 5" by number.
+  `data/facts.json` and the `brand` check both cite "Decision 5" by number.
 
 ## Decision 6: Hero Banner Layout Overhaul
 - **Date:** 2026-08-04
@@ -23,7 +23,7 @@
   recurring defect is a change applied to some surfaces but not all, and it
   never throws — the page just says the wrong thing. The verifier's first run
   found live evidence of exactly this (see F-002 in `memory/failures.md`).
-- **Consequence:** Business facts move to `.agent/facts.json` as the single
+- **Consequence:** Business facts move to `data/facts.json` as the single
   source of truth. Change a price there first, then propagate; the check
   fails until every page, both languages and the JSON-LD agree.
 
@@ -73,3 +73,42 @@
 - **To restore:** `git revert` the removal commit on the `remove-i18n`
   branch, or `git show <commit>^:app.js` for the dictionary alone. The
   Tagalog strings are not lost, only unshipped.
+
+## Decision 11: Warm Palette Off the Brand Mark, and a Real Theme Toggle
+- **Date:** 2026-08-05
+- **Decision:** Replace the sage-green/gold-on-cream palette with a warm one
+  built out from the coral (`#e38060`) already in the logo: clay `#c0533a`
+  accent, warm stone neutrals, espresso darks. Ship an explicit light/dark
+  toggle rather than following the OS only.
+- **Rationale:** Owner: "it should not be the color scheme it is now… warm
+  but modern." The old scheme also had a coherence bug — the only coral on
+  the site was in the logo, and nothing else picked it up.
+- **How it was done without rewriting 1863 lines:** tokens are now semantic
+  (`--accent`, `--ink`, `--paper`) and the old names (`--sage`, `--gold`,
+  `--asphalt`) are kept as aliases pointing at them. Fourteen `rgba()`
+  literals that had escaped the token block were repointed too.
+- **Theming:** a synchronous inline script in each `<head>` stamps
+  `data-theme` before first paint, so there is one dark block and no flash.
+  It is deliberately not in `app.js`, which is deferred and would flash.
+- **Header:** was `position: sticky` and never pinned, because
+  `body { overflow-x: hidden }` made body a scroll container. Now
+  `position: fixed` with `body { overflow-x: clip }` and a `padding-top`.
+
+## Decision 12: WebMCP Tools Read the Same Facts File the Checks Gate
+- **Date:** 2026-08-05
+- **Decision:** `webmcp.js` exposes pricing, service area, permit info, theme
+  and quiz tools through `document.modelContext`. Every fact it states is
+  fetched from `data/facts.json` at runtime — no hardcoded prices.
+- **Why facts moved out of `.agent/`:** GitHub Pages runs Jekyll, which does
+  not serve dot-directories, so `.agent/facts.json` was unreachable from the
+  browser. A tool that cannot read the source of truth would have had to
+  duplicate it, which is F-002 all over again. The file now lives at
+  `data/facts.json` and the checks read it from there.
+- **Nothing sends.** `prepare_lesson_enquiry` fills the booking form and
+  stops. A static site has no server-side rate limiting, so an
+  agent-callable submit is a spam endpoint with a schema attached.
+- **`areaServedZips` is deliberately empty.** Guessing ZIPs for a *free*
+  service is worse than saying "email and ask", which is what the tool does
+  until the list is filled in.
+- **Reality check:** WebMCP needs Chrome 149+ with a flag or an origin-trial
+  token. This will not produce leads. It is a sandbox and a demo.

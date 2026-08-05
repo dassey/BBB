@@ -12,7 +12,7 @@ export const title = 'Header, footer and contact details match across pages';
 
 export function run(ctx) {
   const findings = [];
-  const facts = JSON.parse(ctx.read('.agent/facts.json'));
+  const facts = JSON.parse(ctx.read('data/facts.json'));
 
   const navOf = (page) => {
     const src = stripComments(page.src);
