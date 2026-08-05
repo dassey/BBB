@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run check)",
+      "Bash(npm run check:*)",
+      "Bash(npm run selftest)",
+      "Bash(npm run verify)",
+      "Bash(npm run runtime)",
+      "Bash(npm run snapshot)",
+      "Bash(node .agent/tools/check.mjs:*)",
+      "Bash(node .agent/tools/selftest.mjs:*)",
+      "Bash(node .agent/tools/snapshot.mjs:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.agent/tools/hooks/verify-on-stop.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}
