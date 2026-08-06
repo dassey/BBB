@@ -1455,6 +1455,12 @@ img[src*="og"] {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* The source is landscape (1500x1200) in a 4:5 portrait frame, so cover
+     shows roughly the middle 64% of its width. Mary stands right of centre;
+     a default 50% crop pushes her against the right edge. Bias the window
+     right so she sits in the frame. Revisit if the photo is ever re-shot
+     portrait. */
+  object-position: 62% center;
   transition: transform 0.5s var(--ease);
 }
 

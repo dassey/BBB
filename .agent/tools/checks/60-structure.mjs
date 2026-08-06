@@ -91,6 +91,34 @@ export function run(ctx) {
         msg: 'does not load app.js — the nav and booking form will not work',
       });
     }
+
+    /* og:image has to be an absolute URL. Facebook, Slack and iMessage do
+     * not resolve a relative path and simply render no card — the page
+     * looks fine, the link preview is silently blank, and nothing errors.
+     * Every page shipped `content="images/og.jpg"` until 2026-08-05. */
+    const og = /<meta\s+property="og:image"\s+content="([^"]+)"/.exec(src);
+    if (!og) {
+      findings.push({
+        file: page.name,
+        msg: 'no og:image — shared links render without a preview card',
+      });
+    } else {
+      const url = og[1];
+      if (!/^https?:\/\//i.test(url)) {
+        findings.push({
+          file: page.name,
+          line: at(/property="og:image"/),
+          msg: `og:image is "${url}" — must be an absolute URL`,
+          hint: `Scrapers do not resolve relative paths. Use https://${domain}/${url.replace(/^\/+/, '')}`,
+        });
+      } else if (!url.includes(domain)) {
+        findings.push({
+          file: page.name,
+          line: at(/property="og:image"/),
+          msg: `og:image points at "${url}", which is not on ${domain}`,
+        });
+      }
+    }
   }
 
   return findings;

@@ -67,6 +67,13 @@ const MUTATIONS = [
         s.replace(/<link rel="canonical" href="[^"]*"/, '<link rel="canonical" href="https://northlanddriving.com/"')),
   },
   {
+    name: 'og:image goes back to a relative path',
+    rule: 'structure',
+    apply: (dir) =>
+      edit(dir, 'index.html', (s) =>
+        s.replace('content="https://northlanddriving.com/images/og.jpg"', 'content="images/og.jpg"')),
+  },
+  {
     name: 'an image loses its alt text',
     rule: 'structure',
     apply: (dir) => edit(dir, 'about.html', (s) => s.replace(/<img([^>]*?)\salt="[^"]*"/, '<img$1')),

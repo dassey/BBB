@@ -8,6 +8,44 @@ Newest first.
 
 ---
 
+## F-004 · Every og:image was a relative path
+
+- **Found:** 2026-08-05, by eye, after the owner produced a new `og.jpg`.
+- **Live since:** the multi-page redesign — all six pages.
+- **What happened:** every page carried
+  `<meta property="og:image" content="images/og.jpg" />`. Facebook, Slack and
+  iMessage do not resolve relative paths; they need an absolute URL. So the
+  link preview rendered with no image at all, on every page, forever.
+- **Why nothing caught it:** the failure is entirely off-site. The file
+  existed, the path resolved in a browser, `links` was happy, no page looked
+  wrong. The only symptom lives inside someone else's scraper.
+- **Fix:** absolute URLs plus `og:image:width`/`height`/`alt` and
+  `twitter:card`, so scrapers can lay the card out before the image lands.
+- **Owned by:** `structure`, which now requires `og:image` to be absolute and
+  on the site's own domain. Mutation: *og:image goes back to a relative path*.
+
+---
+
+## F-003 · A check anchored to markup that was deleted underneath it
+
+- **Found:** 2026-08-05, by `npm run selftest` (not by review).
+- **What happened:** `pricing` scoped each price tag to its tier by finding
+  the nearest preceding `data-i18n="pricing.tN."`. Decision 10 removed every
+  `data-i18n` attribute, so the anchor matched nothing, `tier` was always
+  null, and the loop `continue`d on every iteration. The rule did not fail —
+  it stopped existing, silently, while still printing `OK`.
+- **Why nothing caught it:** a check reporting no findings is
+  indistinguishable from a clean repo. Only the mutation test could tell the
+  difference, and it did so immediately.
+- **Fix:** re-anchored to the `.t-name` card, which is real content rather
+  than a translation hook.
+- **Lesson:** this is the argument for P-17 in its strongest form. A rule
+  whose selector is coupled to markup that another task may delete will
+  degrade to a no-op, not to a failure. Anchor rules to content, not
+  scaffolding.
+
+---
+
 ## F-002 · Tagalog pricing tiers swapped against the markup
 
 - **Found:** 2026-08-05, by the first run of `check.mjs` (`pricing`).
@@ -80,18 +118,16 @@ this — only running them against a known defect did.
 
 Things the harness surfaces that need a human decision, not a fix.
 
-- **`styles.css:7` `@import`s a second Google Fonts stylesheet.** Every page
-  already `<link>`s Overpass/Overpass Mono/Inter; the CSS then imports
-  Outfit/JetBrains Mono/variable Inter and prefers those, using the linked
-  pair only as fallback. Both sets download on every page load, and the
-  `@import` cannot start until `styles.css` has arrived. Consolidating means
-  deciding which family the brand actually uses — a design call.
-  Reported by `assets`.
-- **10 dictionary keys are translated but unused** (`cta.*`, `common.badge.*`,
-  `foot.emailcta`, `about.phcaption`, `contact.reach.h`). Leftovers from the
-  redesign. Deleting them is safe; keeping them is harmless but misleads the
-  next edit into thinking that markup still exists. Reported by `i18n`.
-- **`permit.st4.p` drops inline markup.** English wraps the fee in
-  `<span class="cost">$10.00</span>`; the Tagalog writes it plain, so the
-  styled cost pill disappears in Tagalog. One-line fix, but it is a copy
-  decision. Reported by `i18n`.
+*The three earlier observations are resolved (2026-08-05). The duplicate font
+`@import` is gone — one `<link>` now loads exactly the families the CSS names.
+Both dictionary observations died with the translation layer (Decision 10).*
+
+- **`images/instructor.jpg` is landscape in a portrait frame.** The photo is
+  1500×1200; `.portrait` is `aspect-ratio: 4/5`, so `object-fit: cover` shows
+  roughly the middle 64% of its width. Worked around with
+  `object-position: 62%` so the instructor sits in frame rather than against
+  the right edge. A portrait re-shoot would let that override go. Not
+  machine-checkable — whether a crop looks right is a human call.
+- **`images/instructor.jpg` is 467 KB against a 220 KB target.** Re-export at
+  JPEG quality 78–82. Nothing enforces image weight; a size budget in
+  `assets` is a reasonable future check.
